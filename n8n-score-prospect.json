@@ -1,0 +1,23 @@
+{
+  "name": "Hintvite - Score Prospect",
+  "nodes": [
+    {
+      "parameters": {"httpMethod":"POST","path":"hintvite-score-prospect","responseMode":"lastNode","options":{}},
+      "id":"1","name":"Webhook","type":"n8n-nodes-base.webhook","typeVersion":2,"position":[-400,0],"webhookId":"hintvite-score-prospect"
+    },
+    {
+      "parameters": {"method":"POST","url":"={{$env.SUPABASE_URL + '/functions/v1/score-prospect'}}","sendHeaders":true,"headerParameters":{"parameters":[{"name":"Authorization","value":"=Bearer {{$json.authorization || $env.SUPABASE_SERVICE_TOKEN}}"},{"name":"Content-Type","value":"application/json"}]},"sendBody":true,"specifyBody":"json","jsonBody":"={\"prospect_id\": $json.prospect_id}","options":{}},
+      "id":"2","name":"Score with Hintvite AI","type":"n8n-nodes-base.httpRequest","typeVersion":4.2,"position":[-100,0]
+    },
+    {
+      "parameters":{"respondWith":"json","responseBody":"={{$json}}","options":{}},
+      "id":"3","name":"Return result","type":"n8n-nodes-base.respondToWebhook","typeVersion":1.1,"position":[200,0]
+    }
+  ],
+  "connections": {"Webhook":{"main":[[{"node":"Score with Hintvite AI","type":"main","index":0}]]},"Score with Hintvite AI":{"main":[[{"node":"Return result","type":"main","index":0}]]}},
+  "active":false,
+  "settings":{"executionOrder":"v1"},
+  "versionId":"hintvite-v1",
+  "meta":{"templateCredsSetupCompleted":false},
+  "tags":[]
+}

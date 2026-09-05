@@ -1,0 +1,1149 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hintvite — étude des besoins prescripteurs</title>
+<style>
+:root{
+  --paper:#FAF9F7; --card:#FFFFFF; --ink:#17181A; --ink2:#5E6167; --ink3:#93979D;
+  --line:#E6E3DE; --line2:#D3CFC8;
+  --tl:#14584F; --tl-soft:#E7EFEC; --tl-line:#B9D0C9;
+  --amb:#9A6212; --amb-soft:#FBF0DF;
+  --dgr:#9E2F1F; --dgr-soft:#F9E9E6;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:14px;line-height:1.55;-webkit-font-smoothing:antialiased}
+:focus-visible{outline:2px solid var(--tl);outline-offset:2px;border-radius:3px}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+.wrap{max-width:960px;margin:0 auto;padding:0 24px}
+
+/* header */
+header{background:var(--paper);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:20}
+.bar{display:flex;align-items:center;gap:16px;padding:15px 0 12px}
+.bar h1{font-size:17px;font-weight:600;letter-spacing:-.01em;white-space:nowrap}
+.bar h1 span{display:block;font-family:var(--mono);font-size:9.5px;font-weight:400;color:var(--ink3);letter-spacing:.11em;margin-top:2px}
+.count{margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--ink3);letter-spacing:.04em;white-space:nowrap}
+.hsave{padding:7px 16px;font-size:13px;white-space:nowrap}
+@media(max-width:560px){.count{display:none}}
+nav{display:flex;gap:0;overflow-x:auto;scrollbar-width:none}
+nav::-webkit-scrollbar{display:none}
+nav button{background:none;border:0;border-bottom:2px solid transparent;font:inherit;font-size:13.5px;color:var(--ink2);padding:9px 14px 11px;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:7px}
+nav button:hover{color:var(--ink)}
+nav button.on{color:var(--tl);border-bottom-color:var(--tl);font-weight:600}
+nav .pill{font-family:var(--mono);font-size:10px;background:var(--tl-soft);color:var(--tl);padding:1px 6px;border-radius:9px}
+nav .tools{margin-left:auto;display:flex;gap:5px;align-items:center;padding:0 0 6px 22px}
+nav .tools button{border:1px solid var(--line2);border-radius:6px;padding:5px 11px;font-size:12px;color:var(--ink2);background:var(--card)}
+nav .tools button:hover{border-color:var(--tl-line);color:var(--tl);background:var(--tl-soft)}
+nav .tools button.dg{color:var(--dgr);border-color:#E7C9C3}
+nav .tools button.dg:hover{background:var(--dgr-soft);border-color:var(--dgr);color:var(--dgr)}
+nav button.on .pill{background:var(--tl);color:#fff}
+
+main{padding:26px 0 30px}
+.page{display:none}.page.on{display:block}
+
+h2{font-size:20px;font-weight:600;letter-spacing:-.015em;margin-bottom:4px}
+.sub{font-size:13px;color:var(--ink2);margin-bottom:22px;max-width:640px}
+.sec{font-family:var(--mono);font-size:10px;letter-spacing:.12em;color:var(--ink3);margin:28px 0 10px;text-transform:uppercase}
+.sec:first-child{margin-top:0}
+
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:18px 20px;margin-bottom:10px}
+label.q{display:block;font-size:14px;font-weight:600;margin-bottom:3px}
+.hint{font-size:12.5px;color:var(--ink3);margin-bottom:11px}
+input[type=text],textarea,select{width:100%;background:var(--paper);border:1px solid var(--line2);border-radius:7px;padding:9px 11px;font:inherit;font-size:14px;color:var(--ink)}
+textarea{min-height:64px;resize:vertical;line-height:1.6}
+input:focus,textarea:focus,select:focus{border-color:var(--tl-line);outline:none;box-shadow:0 0 0 3px var(--tl-soft);background:var(--card)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:640px){.grid2{grid-template-columns:1fr}}
+
+.opts{display:flex;flex-wrap:wrap;gap:7px}
+.opt{display:inline-flex;align-items:center;gap:0;background:var(--card);border:1px solid var(--line2);border-radius:17px;padding:6px 14px;font-size:13px;color:var(--ink2);cursor:pointer;transition:.12s;user-select:none}
+.opt:hover{border-color:var(--tl-line);color:var(--tl)}
+.opt input{display:none}
+.opt.sel{background:var(--tl);border-color:var(--tl);color:#fff}
+
+/* 100 points */
+.pts{display:grid;grid-template-columns:1fr 78px;gap:8px 14px;align-items:center}
+.pts label{font-size:13.5px}
+.pts input{text-align:center;font-family:var(--mono);font-weight:600;padding:7px}
+.total{display:flex;align-items:center;justify-content:space-between;margin-top:14px;padding-top:13px;border-top:1px solid var(--line)}
+.total b{font-size:13.5px}
+.total .v{font-family:var(--mono);font-size:20px;font-weight:600;padding:2px 14px;border-radius:7px}
+.total .v.ok{background:var(--tl-soft);color:var(--tl)}
+.total .v.no{background:var(--dgr-soft);color:var(--dgr)}
+
+/* fonctionnalités */
+.mod{border:1px solid var(--line);border-radius:10px;margin-bottom:8px;overflow:hidden;background:var(--card)}
+.mod>summary{padding:12px 18px;cursor:pointer;font-weight:600;font-size:14px;display:flex;align-items:center;gap:10px;list-style:none}
+.mod>summary::-webkit-details-marker{display:none}
+.mod>summary::before{content:"▸";color:var(--ink3);font-size:12px;transition:.15s}
+.mod[open]>summary::before{transform:rotate(90deg)}
+.mod>summary em{margin-left:auto;font-family:var(--mono);font-size:10px;font-style:normal;color:var(--ink3)}
+.frow{display:grid;grid-template-columns:1fr 74px 74px;gap:10px;align-items:center;padding:9px 18px;border-top:1px solid var(--line)}
+.frow span{font-size:13px;line-height:1.45}
+.frow .cb{display:flex;align-items:center;justify-content:center}
+.fhead{display:grid;grid-template-columns:1fr 74px 74px;gap:10px;padding:7px 18px;border-top:1px solid var(--line);background:var(--paper)}
+.fhead b{font-family:var(--mono);font-size:9.5px;letter-spacing:.09em;color:var(--ink3);text-align:center;font-weight:400}
+.fhead b:first-child{text-align:left}
+input[type=checkbox]{width:17px;height:17px;accent-color:var(--tl);cursor:pointer}
+input[type=checkbox].bad{accent-color:var(--dgr)}
+input[type=checkbox]:disabled{opacity:.3;cursor:not-allowed}
+.prilim{position:sticky;top:92px;z-index:10;background:var(--card);border:1px solid var(--line);
+  border-radius:10px;padding:11px 18px;margin-bottom:10px;display:flex;align-items:center;gap:16px;
+  flex-wrap:wrap;box-shadow:0 2px 6px rgba(23,24,26,.05)}
+.prilim .n{font-family:var(--mono);font-size:15px;font-weight:600;color:var(--tl);white-space:nowrap}
+.prilim .m{font-size:12.5px;color:var(--ink2)}
+.prilim.full{background:var(--amb-soft);border-color:#EBD3A8}
+.prilim.full .n{color:var(--amb)}
+.prilim.full .m{color:var(--amb);font-weight:500}
+.mod>summary em.has{color:var(--tl);font-weight:600}
+
+/* boutons */
+.btn{background:var(--tl);color:#fff;border:0;border-radius:8px;padding:10px 20px;font:inherit;font-size:14px;font-weight:600;cursor:pointer}
+.btn:hover{background:#0F443D}
+.btn.g{background:none;color:var(--ink2);border:1px solid var(--line2);font-weight:500}
+.btn.g:hover{background:var(--card);color:var(--ink)}
+.btn.d{background:none;color:var(--dgr);border:1px solid var(--dgr);font-weight:500}
+.btn.d:hover{background:var(--dgr-soft)}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px;align-items:center}
+
+/* footer bar */
+.tray{border-top:1px solid var(--line);padding:16px 0 40px;margin-top:34px}
+.tray small{font-size:11.5px;color:var(--ink3)}
+.tray .wrap{display:flex;gap:9px;align-items:center;flex-wrap:wrap}
+#toast{position:fixed;left:50%;transform:translateX(-50%);bottom:28px;background:var(--tl);color:#fff;
+  padding:11px 20px;border-radius:9px;font-size:13.5px;font-weight:500;z-index:40;opacity:0;pointer-events:none;
+  transition:opacity .2s,bottom .2s;box-shadow:0 6px 20px rgba(20,88,79,.28)}
+#toast.on{opacity:1;bottom:38px}
+@media(max-width:700px){.tray small{display:none}}
+
+/* tables & stats */
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{font-family:var(--mono);font-size:9.5px;letter-spacing:.09em;color:var(--ink3);text-align:left;font-weight:400;padding:0 10px 7px;border-bottom:1px solid var(--line)}
+td{padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+tr:last-child td{border-bottom:0}
+td.n{font-family:var(--mono);text-align:center;width:64px}
+.bar-g{height:7px;background:var(--line);border-radius:4px;overflow:hidden}
+.bar-g i{display:block;height:100%;background:var(--tl);border-radius:4px}
+.stat{display:flex;gap:26px;flex-wrap:wrap;margin-bottom:6px}
+.stat div b{display:block;font-size:27px;font-weight:600;letter-spacing:-.02em;font-family:var(--mono)}
+.stat div span{font-family:var(--mono);font-size:9.5px;letter-spacing:.09em;color:var(--ink3)}
+.verdict{background:var(--tl-soft);border:1px solid var(--tl-line);border-radius:9px;padding:14px 17px;font-size:13.5px;line-height:1.65;margin-bottom:9px}
+.verdict b{display:block;font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;color:var(--tl);margin-bottom:6px;font-weight:400}
+.verdict.warn{background:var(--amb-soft);border-color:#EBD3A8}
+.verdict.warn b{color:var(--amb)}
+.verdict.bad{background:var(--dgr-soft);border-color:#EEC9C2}
+.verdict.bad b{color:var(--dgr)}
+.tag{font-family:var(--mono);font-size:9.5px;letter-spacing:.05em;padding:2px 8px;border-radius:5px;white-space:nowrap;display:inline-block}
+.tag.abs{background:var(--dgr);color:#fff}
+.tag.par{background:var(--amb);color:#fff}
+.tag.ok{background:var(--tl-soft);color:var(--tl)}
+.empty{border:1px dashed var(--line2);border-radius:10px;padding:30px;text-align:center;color:var(--ink2);font-size:13.5px}
+.quote{border-left:2px solid var(--tl-line);padding:3px 0 3px 13px;margin-bottom:11px;font-size:13.5px;line-height:1.6}
+.quote em{display:block;font-family:var(--mono);font-size:10px;font-style:normal;color:var(--ink3);margin-top:3px}
+.warnbox{background:var(--amb-soft);border:1px solid #EBD3A8;border-radius:8px;padding:11px 15px;font-size:12.5px;color:var(--amb);margin-bottom:18px}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <div class="bar">
+      <h1>Étude des besoins prescripteurs<span>HINTVITE · ARCHITECTES ET DESIGNERS</span></h1>
+      <div class="count" id="cnt">0 répondant</div>
+      <button class="btn hsave" id="saveH">Enregistrer</button>
+    </div>
+    <nav>
+      <button class="on" data-go="form">Questionnaire</button>
+      <button data-go="list">Répondants <span class="pill" id="pl">0</span></button>
+      <button data-go="etat">État Hintvite</button>
+      <button data-go="audit">Audit et besoins</button>
+      <button data-go="marq">Dossier marques</button>
+      <span class="tools">
+        <button id="expj" title="Télécharger une sauvegarde complète, réimportable">Exporter</button>
+        <button id="impj" title="Charger une sauvegarde précédente">Importer</button>
+        <button id="expc" title="Exporter les réponses au format tableur">CSV</button>
+        <button id="wipe" class="dg" title="Effacer tous les répondants et l'état Hintvite">Effacer</button>
+      </span>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+
+<!-- ═══════════ QUESTIONNAIRE ═══════════ -->
+<section class="page on" id="form">
+  <h2 id="ftitle">Nouveau répondant</h2>
+  <p class="sub">Douze questions, environ quatre minutes. Seul le nom est obligatoire.</p>
+  <div id="wstore"></div>
+
+  <div class="sec">Identification</div>
+  <div class="card">
+    <div class="grid2">
+      <div><label class="q" for="nom">Nom</label><input type="text" id="nom" placeholder="Dupont"></div>
+      <div><label class="q" for="prenom">Prénom</label><input type="text" id="prenom" placeholder="Marie"></div>
+      <div><label class="q" for="tel">Téléphone</label><input type="tel" id="tel" placeholder="06 12 34 56 78"></div>
+      <div><label class="q" for="mail">Adresse e-mail</label><input type="email" id="mail" placeholder="marie.dupont@atelier-md.fr"></div>
+      <div><label class="q" for="stru">Structure</label><input type="text" id="stru" placeholder="Atelier MD"></div>
+      <div><label class="q" for="ville">Ville</label><input type="text" id="ville" placeholder="Paris"></div>
+      <div><label class="q" for="enq">Entretien mené par</label><input type="text" id="enq" placeholder="Prénom de l'enquêteur"></div>
+      <div><label class="q" for="metier">Profession</label>
+        <select id="metier"><option>Architecte</option><option>Architecte d'intérieur</option><option>Designer</option><option>Décorateur</option><option>Maître d'œuvre</option><option>Autre</option></select></div>
+    </div>
+  </div>
+
+  <div class="sec">1 · Votre activité — les faits</div>
+  <div class="card">
+    <div class="grid2">
+      <div><label class="q" for="nbproj">Projets par an intégrant des équipements high-tech</label>
+        <select id="nbproj"><option value="">—</option><option>1 à 5</option><option>6 à 15</option><option>16 à 30</option><option>Plus de 30</option></select></div>
+      <div><label class="q" for="budget">Budget équipement moyen par projet</label>
+        <select id="budget"><option value="">—</option><option>Moins de 20 k€</option><option>20 à 50 k€</option><option>50 à 150 k€</option><option>Plus de 150 k€</option></select></div>
+    </div>
+  </div>
+  <div class="card">
+    <label class="q">Sur votre dernier projet, combien de temps entre votre demande de prix et la réception&nbsp;?</label>
+    <p class="hint">Un fait daté vaut mieux qu'une impression.</p>
+    <div class="opts" id="delai"></div>
+  </div>
+  <div class="card">
+    <label class="q">Combien de versions de chiffrage avant validation, sur ce même projet&nbsp;?</label>
+    <div class="opts" id="versions"></div>
+  </div>
+
+  <div class="sec">2 · Négociation, service et après-vente</div>
+  <div class="card">
+    <label class="q">Comment obtenez-vous vos conditions tarifaires aujourd'hui&nbsp;?</label>
+    <div class="opts" id="negmode"></div>
+  </div>
+  <div class="card">
+    <label class="q">Vos conditions varient-elles d'un projet à l'autre&nbsp;?</label>
+    <div class="opts" id="negvar"></div>
+  </div>
+  <div class="card">
+    <label class="q">Combien d'heures par mois consacrez-vous à négocier prix et remises&nbsp;?</label>
+    <div class="opts" id="negh"></div>
+  </div>
+  <div class="card">
+    <label class="q">Et combien d'heures par mois au service et à l'après-vente&nbsp;?</label>
+    <p class="hint">Produit non conforme, retard, panne, relance fournisseur, hotline.</p>
+    <div class="opts" id="sav"></div>
+  </div>
+  <div class="card">
+    <label class="q">Quand un problème survient après livraison, qui gère la relation avec le fournisseur&nbsp;?</label>
+    <div class="opts" id="savqui"></div>
+  </div>
+  <div class="card" style="background:var(--tl-soft);border-color:var(--tl-line)">
+    <label class="q">Un interlocuteur unique pour la hotline, le service et l'après-vente, quelle que soit la marque&nbsp;: cela justifierait-il à soi seul de passer par la plateforme&nbsp;?</label>
+    <p class="hint">Répondez comme si tout le reste vous était égal.</p>
+    <div class="opts" id="guichet"></div>
+  </div>
+
+  <div class="sec">3 · Les marques</div>
+  <div class="card">
+    <label class="q" for="mq1">Quelles marques prescrivez-vous le plus souvent&nbsp;?</label>
+    <p class="hint">Trois ou quatre suffisent.</p>
+    <textarea id="mq1" style="min-height:52px"></textarea>
+  </div>
+  <div class="card">
+    <label class="q" for="mq2">Quelles marques n'arrivez-vous pas à obtenir en tarif professionnel&nbsp;?</label>
+    <p class="hint">La réponse la plus utile du questionnaire : elle désigne les partenariats à aller chercher en priorité.</p>
+    <textarea id="mq2" style="min-height:52px"></textarea>
+  </div>
+
+  <div class="sec">4 · Le client final</div>
+  <div class="card">
+    <label class="q">Qui passe la commande une fois la proposition validée&nbsp;?</label>
+    <div class="opts" id="qui"></div>
+  </div>
+  <div class="card">
+    <label class="q">Sur dix clients, combien vont acheter en direct après avoir vu votre proposition&nbsp;?</label>
+    <p class="hint">Cette réponse détermine ce que la plateforme aura le droit d'afficher au client.</p>
+    <div class="opts" id="direct"></div>
+  </div>
+
+  <div class="sec">5 · Les univers</div>
+  <div class="card">
+    <label class="q">Sur quels univers prescrivez-vous aujourd'hui&nbsp;?</label>
+    <p class="hint">Plusieurs réponses possibles.</p>
+    <div class="opts" id="u1"></div>
+  </div>
+  <div class="card">
+    <label class="q">Sur lesquels aimeriez-vous prescrire, mais y renoncez&nbsp;?</label>
+    <p class="hint">Faute d'accès aux marques ou de maîtrise technique. C'est la question qui désigne où Hintvite crée le plus de valeur.</p>
+    <div class="opts" id="u2"></div>
+  </div>
+  <div class="card">
+    <label class="q">Votre principale difficulté aujourd'hui</label>
+    <p class="hint">Une seule réponse.</p>
+    <div class="opts" id="dif"></div>
+  </div>
+
+  <div class="sec">6 · Les 7 grandes fonctions — arbitrage</div>
+  <div class="card">
+    <label class="q">Répartissez 100 points entre ces sept fonctions</label>
+    <p class="hint">Il s'agit des sept grandes étapes du métier, pas du détail. Vous pouvez tout mettre sur une seule. C'est la question la plus importante du formulaire : elle vous oblige à renoncer.</p>
+    <div class="pts" id="pts"></div>
+    <div class="total"><b>Total</b><span class="v no" id="ptot">0</span></div>
+  </div>
+
+  <div class="sec">7 · Les 36 fonctionnalités détaillées</div>
+  <div class="card" style="padding:14px 18px;margin-bottom:10px;background:var(--tl-soft);border-color:var(--tl-line)">
+    <p style="font-size:13px;line-height:1.6;margin:0">Les sept fonctions ci-dessus se décomposent en <b>36 fonctionnalités concrètes</b>. Choisissez jusqu'à <b>huit priorités parmi ces 36, toutes fonctions confondues</b> — vous pouvez très bien en prendre quatre dans une seule fonction et quatre ailleurs.</p>
+  </div>
+  <div class="prilim" id="prilim">
+    <span class="n" id="maxp">0 / 8</span>
+    <span class="m" id="prihint">priorités choisies parmi les 36 fonctionnalités. Cochez celles que vous voudriez dès la première version. Sans limite pour ce qui vous paraît inutile.</span>
+  </div>
+  <div id="fonc"></div>
+
+  <div class="card">
+    <label class="q" for="pri1">Si vous ne pouviez en garder qu'une seule, laquelle&nbsp;?</label>
+    <p class="hint">Parmi les priorités que vous venez de cocher. C'est le rang qui compte, pas l'ensemble.</p>
+    <select id="pri1"><option value="">—</option></select>
+  </div>
+
+  <div class="sec">8 · Les questions ouvertes</div>
+  <div class="card">
+    <label class="q" for="q6">Quelle absence vous ferait renoncer à utiliser la plateforme&nbsp;?</label>
+    <p class="hint">Une seule chose. C'est la réponse la plus fiable de tout le questionnaire.</p>
+    <textarea id="q6"></textarea>
+  </div>
+  <div class="card">
+    <label class="q" for="q7">Que devrait faire la plateforme qui n'apparaît nulle part ci-dessus&nbsp;?</label>
+    <textarea id="q7"></textarea>
+  </div>
+  <div class="card">
+    <label class="q" for="q8">Que ne devrait-elle surtout pas faire&nbsp;?</label>
+    <textarea id="q8"></textarea>
+  </div>
+
+  <div class="sec">9 · Les conditions</div>
+  <div class="card"><label class="q">Vos projets et vos prix de cession seraient visibles par</label><div class="opts" id="c9"></div></div>
+  <div class="card"><label class="q">Accepteriez-vous que les marques voient vos projets, contre de meilleures conditions&nbsp;?</label><div class="opts" id="c10"></div></div>
+  <div class="card"><label class="q">Quel modèle économique vous conviendrait&nbsp;?</label><div class="opts" id="c11"></div></div>
+  <div class="card"><label class="q">En combien de temps la plateforme devrait-elle vous permettre de chiffrer&nbsp;?</label><div class="opts" id="c12"></div></div>
+
+  <div class="sec">10 · L'engagement</div>
+  <div class="card">
+    <label class="q">À partir de quel montant mensuel cette plateforme serait-elle trop chère pour vous&nbsp;?</label>
+    <p class="hint">Le seuil au-delà duquel vous renonceriez, même si l'outil vous convenait.</p>
+    <div class="opts" id="prixmax"></div>
+  </div>
+  <div class="card">
+    <label class="q">Seriez-vous prêt à tester la plateforme sur un projet réel dans les trois mois&nbsp;?</label>
+    <p class="hint">La seule question de ce formulaire qui engage à quelque chose.</p>
+    <div class="opts" id="test"></div>
+  </div>
+  <div class="card">
+    <label class="q" for="reco">Un confrère à qui nous devrions parler&nbsp;?</label>
+    <textarea id="reco" style="min-height:52px" placeholder="Nom, structure, et si possible un contact"></textarea>
+  </div>
+
+  <div class="actions">
+    <button class="btn" id="save">Enregistrer ce répondant</button>
+    <button class="btn g" id="reset">Vider le formulaire</button>
+    <span id="editing" style="font-size:12.5px;color:var(--amb)"></span>
+  </div>
+</section>
+
+<!-- ═══════════ RÉPONDANTS ═══════════ -->
+<section class="page" id="list">
+  <h2>Répondants</h2>
+  <p class="sub">Cliquez sur une ligne pour la rouvrir et la modifier.</p>
+  <div id="ltable"></div>
+</section>
+
+<!-- ═══════════ ÉTAT HINTVITE ═══════════ -->
+<section class="page" id="etat">
+  <h2>État actuel de Hintvite</h2>
+  <p class="sub">Indiquez une fois pour toutes ce que la plateforme sait déjà faire. L'audit croisera cet état avec la demande pour vous dire ce qui manque réellement.</p>
+  <div id="etatlist"></div>
+</section>
+
+<section class="page" id="marq">
+  <h2>Dossier marques</h2>
+  <p class="sub">L'argumentaire à présenter aux marques, construit sur les réponses. Se recalcule à chaque entretien.</p>
+  <div id="mq"></div>
+</section>
+
+<!-- ═══════════ AUDIT ═══════════ -->
+<section class="page" id="audit">
+  <h2>Audit et besoins</h2>
+  <p class="sub">Se recalcule à chaque nouveau répondant enregistré.</p>
+  <div id="aud"></div>
+</section>
+
+</main>
+
+<div id="toast"></div>
+<div class="tray"><div class="wrap">
+  <small id="stat"></small>
+  <input type="file" id="file" accept=".json" style="display:none">
+</div></div>
+
+<script>
+(function(){
+"use strict";
+
+const UNIVERS = ["Audio","Vidéo et home cinéma","Électroménager","Éclairage","Domotique et pilotage","Extérieur","Autres"];
+const DIFF = ["Accéder aux prix professionnels","Obtenir les bonnes remises","Trouver les bons produits",
+  "Comparer des solutions équivalentes","Chiffrer rapidement","Trouver un installateur compétent",
+  "Suivre les délais de livraison","Gérer les problèmes après pose","Gérer le SAV"];
+const MODULES = [
+ ["A","Accéder aux produits",[
+  "Catalogue multi-marques par univers, avec fiches techniques complètes",
+  "Recherche par contrainte : dimensions, encastrement, ventilation, alimentation",
+  "Visuels haute définition exploitables dans vos planches",
+  "Descriptif et fiches techniques prêts à télécharger",
+  "Compatibilité entre produits et avec les systèmes existants",
+  "Alerte sur les produits arrêtés ou en fin de commercialisation",
+  "Équivalent disponible quand un produit manque ou dépasse le budget"]],
+ ["B","Accéder aux prix",[
+  "Prix professionnels affichés sans demande préalable",
+  "Prix de cession personnalisé selon votre volume",
+  "Disponibilité et délai en temps réel",
+  "Historique des prix de vos projets passés",
+  "Alerte si un prix évolue avant validation client"]],
+ ["C","Chiffrer",[
+  "Chiffrage par glisser-déposer depuis le catalogue",
+  "Calcul automatique de votre marge ou honoraires",
+  "Plusieurs versions d'un même chiffrage",
+  "Duplication d'un chiffrage d'un projet à l'autre",
+  "Comparaison de deux scénarios budgétaires",
+  "Chiffrage par lot, par pièce ou par étage",
+  "Export vers Excel"]],
+ ["D","Présenter au client",[
+  "Proforma générée à votre charte graphique",
+  "Masquer marques, prix unitaires ou votre marge",
+  "Version client en ligne, validation en un clic",
+  "Planche de présentation générée depuis le chiffrage",
+  "Historique des versions envoyées et validées"]],
+ ["E","Commander et suivre",[
+  "Commande directe depuis le chiffrage validé",
+  "Suivi des livraisons par produit et par chantier",
+  "Alerte en cas de rupture ou de report",
+  "Coordination des livraisons avec le planning",
+  "Facturation centralisée, un seul interlocuteur"]],
+ ["F","Faire poser",[
+  "Annuaire d'installateurs par univers et par zone",
+  "Chiffrage de pose rattaché aux produits prescrits",
+  "Devis fourniture et pose en un document unique",
+  "Suivi de l'intervention et compte rendu"]],
+ ["G","Après la livraison",[
+  "Interlocuteur unique pour le SAV, toutes marques",
+  "Suivi des demandes en cours",
+  "Historique des équipements installés par projet"]]
+];
+const C9  = ["Vous seul","Vous et vos installateurs","Peu importe"];
+const C10 = ["Oui","Non","Selon la marque"];
+const C11 = ["Abonnement sans commission","Gratuit avec commission","Abonnement + commission réduite","Paiement par projet"];
+const C12 = ["2 à 5 minutes","10 à 15 minutes","Plus de 15 minutes"];
+const DELAI = ["Moins de 24 h","2 à 3 jours","Une semaine","Plus d'une semaine","Pas toujours de réponse"];
+const VERS = ["1 version","2 versions","3 versions","4 versions ou plus"];
+const SAV = ["Moins d'1 h","1 à 3 h","3 à 8 h","Plus de 8 h"];
+const QUI = ["Moi","Le client","L'entreprise","Variable"];
+const DIR = ["Aucun","1 à 2 sur 10","3 à 5 sur 10","Plus de 5 sur 10"];
+const PRIX = ["Moins de 30 €","30 à 60 €","60 à 120 €","120 à 250 €","Plus de 250 €","Je ne paierais pas d'abonnement"];
+const TEST = ["Oui","Peut-être","Non"];
+const NEGMODE = ["Je négocie marque par marque","Je passe par un revendeur ou un intégrateur",
+                 "J'ai des conditions fixes, négociées une fois","Je n'obtiens pas de conditions professionnelles"];
+const NEGVAR = ["Oui, systématiquement","Parfois","Non, elles sont stables"];
+const HEURES = ["Moins d'1 h","1 à 3 h","3 à 8 h","Plus de 8 h"];
+const SAVQUI = ["Moi","Mon client","L'installateur","Personne vraiment — ça traîne"];
+const GUICHET = ["Oui, à soi seul","Cela compterait beaucoup","Ce serait un plus","Non"];
+const MAXP = 8;
+
+const FEATS = [];
+MODULES.forEach(([l,nom,items]) => items.forEach((t,i) => FEATS.push({code:l+(i+1), mod:nom, modL:l, txt:t})));
+
+const KEY = "hintvite_etude_v1";
+let DB = {reps:[], etat:{}}, editIdx = -1, storeOK = true;
+
+/* ---------- persistance ---------- */
+function load(){
+  try{ const raw = localStorage.getItem(KEY); if(raw) DB = JSON.parse(raw); }
+  catch(e){ storeOK = false; }
+}
+function save(){
+  try{ localStorage.setItem(KEY, JSON.stringify(DB)); }
+  catch(e){ storeOK = false; banner(); }
+}
+function banner(){
+  if(storeOK) return;
+  const w = document.getElementById("wstore");
+  if(w.innerHTML) return;
+  w.innerHTML = '<div class="warnbox">Votre navigateur n\'autorise pas la sauvegarde automatique ici. Les réponses restent en mémoire tant que l\'onglet est ouvert&nbsp;: pensez à cliquer sur <b>Exporter (sauvegarde)</b> avant de fermer. En ouvrant ce fichier directement depuis votre ordinateur, la sauvegarde fonctionne.</div>';
+}
+
+/* ---------- construction du formulaire ---------- */
+function chips(id, arr, multi){
+  const box = document.getElementById(id);
+  box.innerHTML = arr.map((t,i)=>
+    `<label class="opt" data-i="${i}"><input type="${multi?'checkbox':'radio'}" name="${id}" value="${t}">${t}</label>`).join("");
+  box.querySelectorAll(".opt").forEach(o=>{
+    const inp = o.querySelector("input");
+    inp.addEventListener("change", ()=>{
+      if(!multi) box.querySelectorAll(".opt").forEach(x=>x.classList.remove("sel"));
+      o.classList.toggle("sel", inp.checked);
+    });
+  });
+}
+chips("u1", UNIVERS, true); chips("u2", UNIVERS, true); chips("dif", DIFF, false);
+chips("c9", C9, false); chips("c10", C10, false); chips("c11", C11, false); chips("c12", C12, false);
+chips("delai", DELAI, false); chips("versions", VERS, false); chips("sav", SAV, false);
+chips("qui", QUI, false); chips("direct", DIR, false); chips("prixmax", PRIX, false); chips("test", TEST, false);
+chips("negmode", NEGMODE, false); chips("negvar", NEGVAR, false); chips("negh", HEURES, false);
+chips("savqui", SAVQUI, false); chips("guichet", GUICHET, false);
+document.getElementById("pri1").innerHTML = '<option value="">—</option>' +
+  FEATS.map(f=>`<option value="${f.code}">${f.code} · ${f.txt}</option>`).join("");
+
+document.getElementById("pts").innerHTML = MODULES.map(([l,n])=>
+  `<label for="p${l}">${l}. ${n}</label><input type="number" id="p${l}" min="0" max="100" step="5" value="" placeholder="0">`).join("");
+function total(){
+  let t=0; MODULES.forEach(([l])=>{ t += Number(document.getElementById("p"+l).value)||0; });
+  const el=document.getElementById("ptot");
+  el.textContent=t; el.className="v "+(t===100?"ok":"no");
+  return t;
+}
+MODULES.forEach(([l])=>document.getElementById("p"+l).addEventListener("input", total));
+
+document.getElementById("fonc").innerHTML = MODULES.map(([l,nom,items])=>`
+ <details class="mod"${l==="A"?" open":""}>
+  <summary>${l}. ${nom}<em>${items.length} FONCTIONNALITÉS</em></summary>
+  <div class="fhead"><b>Fonctionnalité</b><b>PRIORITÉ</b><b>INUTILE</b></div>
+  ${items.map((t,i)=>{const c=l+(i+1);return `
+   <div class="frow"><span>${t}</span>
+    <span class="cb"><input type="checkbox" class="pri" data-c="${c}"></span>
+    <span class="cb"><input type="checkbox" class="bad inu" data-c="${c}"></span></div>`;}).join("")}
+ </details>`).join("");
+
+function toast(msg){
+  const t=document.getElementById("toast");
+  t.textContent=msg; t.classList.add("on");
+  clearTimeout(t._h); t._h=setTimeout(()=>t.classList.remove("on"),2800);
+}
+function syncPri(){
+  const n=[...document.querySelectorAll(".pri")].filter(x=>x.checked).length;
+  document.getElementById("maxp").textContent = n+" / "+MAXP;
+  const bar=document.getElementById("prilim"), h=document.getElementById("prihint");
+  bar.classList.toggle("full", n>=MAXP);
+  h.textContent = n>=MAXP
+    ? "Limite atteinte. Pour en choisir une autre, décochez-en d'abord une."
+    : "priorités choisies parmi les 36 fonctionnalités. Cochez celles que vous voudriez dès la première version. Sans limite pour ce qui vous paraît inutile.";
+  document.querySelectorAll("#fonc .mod").forEach(m=>{
+    const em=m.querySelector("summary em");
+    if(!em) return;
+    const c=[...m.querySelectorAll(".pri")].filter(x=>x.checked).length;
+    const tot=m.querySelectorAll(".frow").length;
+    em.textContent = c ? c+" PRIORITÉ"+(c>1?"S":"")+" SUR "+tot : tot+" FONCTIONNALITÉS";
+    em.classList.toggle("has", c>0);
+  });
+}
+document.querySelectorAll(".pri").forEach(x=>x.addEventListener("change",()=>{
+  const n=[...document.querySelectorAll(".pri")].filter(y=>y.checked).length;
+  if(x.checked && n>MAXP){
+    x.checked=false;
+    toast("Huit priorités maximum. Décochez-en une pour en choisir une autre.");
+    const bar=document.getElementById("prilim");
+    bar.animate([{transform:"translateX(0)"},{transform:"translateX(-5px)"},
+                 {transform:"translateX(5px)"},{transform:"translateX(0)"}],{duration:260});
+  }
+  syncPri();
+}));
+
+/* ---------- lire / écrire le formulaire ---------- */
+function vals(id){ return [...document.querySelectorAll(`#${id} input:checked`)].map(x=>x.value); }
+function val1(id){ const e=document.querySelector(`#${id} input:checked`); return e?e.value:""; }
+
+function read(){
+  const o = {
+    nom: document.getElementById("nom").value.trim(),
+    prenom: document.getElementById("prenom").value.trim(),
+    tel: document.getElementById("tel").value.trim(),
+    mail: document.getElementById("mail").value.trim(),
+    stru: document.getElementById("stru").value.trim(),
+    ville: document.getElementById("ville").value.trim(),
+    metier: document.getElementById("metier").value,
+    enq: document.getElementById("enq").value.trim(),
+    nbproj: document.getElementById("nbproj").value,
+    budget: document.getElementById("budget").value,
+    delai: val1("delai"), versions: val1("versions"), sav: val1("sav"),
+    negmode: val1("negmode"), negvar: val1("negvar"), negh: val1("negh"),
+    savqui: val1("savqui"), guichet: val1("guichet"),
+    mq1: document.getElementById("mq1").value.trim(),
+    mq2: document.getElementById("mq2").value.trim(),
+    qui: val1("qui"), direct: val1("direct"),
+    pri1: document.getElementById("pri1").value,
+    prixmax: val1("prixmax"), test: val1("test"),
+    reco: document.getElementById("reco").value.trim(),
+    u1: vals("u1"), u2: vals("u2"), dif: val1("dif"),
+    pts:{}, pri:[], inu:[],
+    q6: document.getElementById("q6").value.trim(),
+    q7: document.getElementById("q7").value.trim(),
+    q8: document.getElementById("q8").value.trim(),
+    c9: val1("c9"), c10: val1("c10"), c11: val1("c11"), c12: val1("c12"),
+    date: new Date().toISOString().slice(0,10)
+  };
+  MODULES.forEach(([l])=>{ o.pts[l] = Number(document.getElementById("p"+l).value)||0; });
+  document.querySelectorAll(".pri").forEach(x=>{ if(x.checked) o.pri.push(x.dataset.c); });
+  document.querySelectorAll(".inu").forEach(x=>{ if(x.checked) o.inu.push(x.dataset.c); });
+  return o;
+}
+function clear(){
+  ["nom","prenom","tel","mail","stru","ville","q6","q7","q8","mq1","mq2","reco","enq"].forEach(i=>document.getElementById(i).value="");
+  document.getElementById("metier").selectedIndex=0;
+  ["nbproj","budget","pri1"].forEach(i=>document.getElementById(i).value="");
+  document.querySelectorAll(".opt").forEach(o=>{o.classList.remove("sel"); o.querySelector("input").checked=false;});
+  MODULES.forEach(([l])=>document.getElementById("p"+l).value="");
+  document.querySelectorAll(".pri,.inu").forEach(x=>x.checked=false);
+  total(); syncPri();
+  editIdx=-1;
+  document.getElementById("ftitle").textContent="Nouveau répondant";
+  document.getElementById("editing").textContent="";
+  document.getElementById("save").textContent="Enregistrer ce répondant";
+  document.getElementById("saveH").textContent="Enregistrer";
+}
+function fill(o,i){
+  clear(); editIdx=i;
+  ["nom","prenom","tel","mail","stru","ville","q6","q7","q8","mq1","mq2","reco","enq"].forEach(k=>document.getElementById(k).value=o[k]||"");
+  document.getElementById("metier").value=o.metier||"Architecte";
+  ["nbproj","budget","pri1"].forEach(k=>document.getElementById(k).value=o[k]||"");
+  const setc=(id,arr)=>document.querySelectorAll(`#${id} .opt`).forEach(l=>{
+    const inp=l.querySelector("input");
+    if(arr.indexOf(inp.value)>-1){inp.checked=true;l.classList.add("sel");}});
+  setc("u1",o.u1||[]); setc("u2",o.u2||[]); setc("dif",[o.dif]);
+  setc("c9",[o.c9]); setc("c10",[o.c10]); setc("c11",[o.c11]); setc("c12",[o.c12]);
+  setc("delai",[o.delai]); setc("versions",[o.versions]); setc("sav",[o.sav]);
+  setc("negmode",[o.negmode]); setc("negvar",[o.negvar]); setc("negh",[o.negh]);
+  setc("savqui",[o.savqui]); setc("guichet",[o.guichet]);
+  setc("qui",[o.qui]); setc("direct",[o.direct]); setc("prixmax",[o.prixmax]); setc("test",[o.test]);
+  MODULES.forEach(([l])=>document.getElementById("p"+l).value=(o.pts&&o.pts[l])||"");
+  document.querySelectorAll(".pri").forEach(x=>x.checked=(o.pri||[]).indexOf(x.dataset.c)>-1);
+  document.querySelectorAll(".inu").forEach(x=>x.checked=(o.inu||[]).indexOf(x.dataset.c)>-1);
+  total(); syncPri();
+  document.getElementById("ftitle").textContent="Modifier — "+nomComplet(o);
+  document.getElementById("editing").textContent="Vous modifiez une fiche existante.";
+  document.getElementById("save").textContent="Mettre à jour";
+  document.getElementById("saveH").textContent="Mettre à jour";
+  go("form");
+}
+
+/* ---------- état Hintvite ---------- */
+function drawEtat(){
+  document.getElementById("etatlist").innerHTML = MODULES.map(([l,nom,items])=>`
+   <details class="mod" open><summary>${l}. ${nom}</summary>
+   ${items.map((t,i)=>{const c=l+(i+1); const v=DB.etat[c]||"absent"; return `
+    <div class="frow" style="grid-template-columns:1fr 150px"><span>${t}</span>
+     <select data-e="${c}">
+      <option value="existe"${v==="existe"?" selected":""}>Existe</option>
+      <option value="partiel"${v==="partiel"?" selected":""}>Partiel</option>
+      <option value="absent"${v==="absent"?" selected":""}>N'existe pas</option>
+     </select></div>`;}).join("")}
+   </details>`).join("");
+  document.querySelectorAll("[data-e]").forEach(s=>s.addEventListener("change",()=>{
+    DB.etat[s.dataset.e]=s.value; save(); drawAudit();
+  }));
+}
+
+/* ---------- répondants ---------- */
+function drawList(){
+  const n=DB.reps.length;
+  document.getElementById("cnt").textContent = n+" répondant"+(n>1?"s":"");
+  document.getElementById("pl").textContent = n;
+  document.getElementById("stat").textContent = storeOK
+    ? "Sauvegarde automatique active dans ce navigateur. Utilisez « Exporter » en haut à droite pour conserver une copie ou la partager."
+    : "Sauvegarde automatique indisponible ici. Exportez vos réponses avant de fermer l’onglet.";
+  if(!n){ document.getElementById("ltable").innerHTML='<div class="empty">Aucun répondant enregistré. Remplissez le questionnaire, puis cliquez sur « Enregistrer ce répondant ».</div>'; return; }
+  document.getElementById("ltable").innerHTML = `<div class="card" style="padding:14px 8px"><table>
+   <tr><th>Répondant</th><th>Contact</th><th>Structure</th><th>Fonction dominante</th><th>Sa rupture</th><th></th></tr>
+   ${DB.reps.map((o,i)=>{
+     const dom = domin(o);
+     return `<tr>
+      <td><b>${esc(nomComplet(o))}</b><br><em style="font-size:11.5px;color:var(--ink3)">${esc(o.metier||"")}${o.ville?" · "+esc(o.ville):""}${o.enq?" · par "+esc(o.enq):""}</em></td>
+      <td style="font-size:12.5px">${o.mail?`<a href="mailto:${esc(o.mail)}" style="color:var(--tl)">${esc(o.mail)}</a><br>`:""}${esc(o.tel||"")}${!o.mail&&!o.tel?"—":""}</td>
+      <td>${esc(o.stru||"—")}</td>
+      <td>${dom?esc(dom.nom)+" · "+dom.v+" pts":"—"}</td>
+      <td style="max-width:230px">${esc(o.q6||"—")}</td>
+      <td style="width:140px;text-align:right;white-space:nowrap">
+        <button class="btn g" style="padding:5px 11px;font-size:12px" data-open="${i}">Ouvrir</button>
+        <button class="btn g" style="padding:5px 9px;font-size:12px" data-del="${i}">✕</button></td></tr>`;}).join("")}
+   </table></div>`;
+  document.querySelectorAll("[data-open]").forEach(b=>b.addEventListener("click",()=>fill(DB.reps[b.dataset.open],Number(b.dataset.open))));
+  document.querySelectorAll("[data-del]").forEach(b=>b.addEventListener("click",()=>{
+    if(confirm("Supprimer ce répondant ?")){ DB.reps.splice(Number(b.dataset.del),1); save(); drawList(); drawAudit(); }
+  }));
+}
+function nomComplet(o){
+  const n=[o.prenom,o.nom].filter(Boolean).join(" ");
+  return n || o.nom || "—";
+}
+function domin(o){
+  if(!o.pts) return null;
+  let best=null;
+  MODULES.forEach(([l,n])=>{ const v=o.pts[l]||0; if(!best||v>best.v) best={l:l,nom:n,v:v}; });
+  return best && best.v>0 ? best : null;
+}
+function esc(s){ return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
+
+/* ---------- outils d'analyse ---------- */
+const PROJ_MID={"1 à 5":3,"6 à 15":10,"16 à 30":23,"Plus de 30":40};
+const BUD_MID={"Moins de 20 k€":12,"20 à 50 k€":35,"50 à 150 k€":100,"Plus de 150 k€":220};
+function volAn(o){ return (PROJ_MID[o.nbproj]||0)*(BUD_MID[o.budget]||0); }
+function gros(o){ return o.nbproj==="16 à 30"||o.nbproj==="Plus de 30"
+                      ||o.budget==="50 à 150 k€"||o.budget==="Plus de 150 k€"; }
+function keur(v){ return v>=1000 ? (v/1000).toFixed(1).replace(".",",")+" M€" : Math.round(v)+" k€"; }
+function marquesCitees(R,champ){
+  const m={};
+  R.forEach(o=>{
+    if(!o[champ]) return;
+    o[champ].split(/[,;\n\/•·]+/).map(x=>x.trim().replace(/\s+/g," ")).filter(x=>x.length>1)
+     .forEach(x=>{
+       const k=x.toLowerCase();
+       if(!m[k]) m[k]={nom:x,n:0,vol:0,reps:[]};
+       m[k].n++; m[k].vol+=volAn(o); m[k].reps.push(o);
+     });
+  });
+  return Object.values(m).sort((a,b)=>b.n-a.n||b.vol-a.vol);
+}
+function topPri(R,k){
+  const c={}; R.forEach(o=>(o.pri||[]).forEach(p=>c[p]=(c[p]||0)+1));
+  return Object.keys(c).map(p=>({c:p,n:c[p],f:FEATS.find(f=>f.code===p)}))
+    .sort((a,b)=>b.n-a.n).slice(0,k);
+}
+function modDom(R){
+  if(!R.length) return null;
+  const mo=MODULES.map(([l])=>R.reduce((a,o)=>a+((o.pts&&o.pts[l])||0),0)/R.length);
+  const i=mo.indexOf(Math.max(...mo));
+  return {nom:MODULES[i][1], v:mo[i]};
+}
+
+/* ---------- audit ---------- */
+function drawAudit(){
+  const R=DB.reps, N=R.length, A=document.getElementById("aud");
+  if(!N){ A.innerHTML='<div class="empty">L\'audit se construira dès le premier répondant enregistré.</div>'; return; }
+  const t3=Math.ceil(N/3), t2=Math.ceil(N/2);
+  const cnt=(arr,v)=>arr.filter(x=>x===v).length;
+
+  const u1=UNIVERS.map(u=>R.filter(o=>(o.u1||[]).indexOf(u)>-1).length);
+  const u2=UNIVERS.map(u=>R.filter(o=>(o.u2||[]).indexOf(u)>-1).length);
+  const df=DIFF.map(d=>R.filter(o=>o.dif===d).length);
+  const mo=MODULES.map(([l])=>{ const s=R.reduce((a,o)=>a+((o.pts&&o.pts[l])||0),0); return N?s/N:0; });
+  const ord=MODULES.map((m,i)=>({l:m[0],nom:m[1],v:mo[i]})).sort((a,b)=>b.v-a.v);
+  const ecart=ord[0].v-ord[1].v;
+
+  const feats=FEATS.map(f=>({...f,
+    pri:R.filter(o=>(o.pri||[]).indexOf(f.code)>-1).length,
+    inu:R.filter(o=>(o.inu||[]).indexOf(f.code)>-1).length,
+    etat:DB.etat[f.code]||"absent"}));
+  const dem=feats.filter(f=>f.pri>=t3 && f.inu<t3).sort((a,b)=>b.pri-a.pri);
+  const manque=dem.filter(f=>f.etat==="absent");
+  const partiel=dem.filter(f=>f.etat==="partiel");
+  const ok=dem.filter(f=>f.etat==="existe");
+  const retirer=feats.filter(f=>f.inu>=t3).sort((a,b)=>b.inu-a.inu);
+
+  const imax=(a)=>a.indexOf(Math.max(...a));
+  const iu1=imax(u1), iu2=imax(u2), idf=imax(df);
+
+  const c=(k,v)=>R.filter(o=>o[k]===v).length;
+  let vBiface, vTarif, vConf, vTemps;
+  const nOui=c("c10","Oui"), nNon=c("c10","Non"), nSel=c("c10","Selon la marque");
+  vBiface = nNon>=nOui+nSel
+    ? ["bad","Le modèle biface doit être revu : "+nNon+" répondants sur "+N+" refusent que les marques voient leurs projets. La valeur vendue aux marques ne peut plus reposer sur la visibilité des prescriptions, mais sur le seul volume de commandes généré."]
+    : (nSel>=nOui
+      ? ["warn","Acceptation conditionnelle ("+nSel+" sur "+N+"). Prévoyez un réglage marque par marque dès la première version, jamais un consentement global à l'inscription."]
+      : ["", "Le modèle biface tient : "+nOui+" répondants sur "+N+" acceptent. La visibilité des prescriptions est monétisable auprès des marques."]);
+  const nAb=c("c11","Abonnement sans commission"), nCo=c("c11","Gratuit avec commission");
+  vTarif = nAb>=nCo
+    ? ["","L'abonnement sans commission l'emporte ("+nAb+" sur "+N+"). Toute rémunération prélevée sur la prescription serait perçue comme une captation de leur travail."]
+    : ["warn","La gratuité avec commission l'emporte ("+nCo+" sur "+N+"). La barrière à l'entrée pèse plus que la crainte du prélèvement, à condition que la commission soit visible dès l'inscription."];
+  const nSeul=c("c9","Vous seul");
+  vConf = nSeul>N/2
+    ? ["warn","Cloisonnement strict exigé ("+nSeul+" sur "+N+"). La confidentialité des prix de cession est un prérequis technique, à traiter au niveau de la base de données."]
+    : ["","Le partage avec les installateurs partenaires est accepté. Un réglage projet par projet suffira."];
+  const nR=c("c12","2 à 5 minutes");
+  vTemps = nR>N/2
+    ? ["warn","Exigence forte ("+nR+" sur "+N+" attendent moins de cinq minutes). Cela exclut la saisie manuelle et impose le glisser-déposer et des gabarits réutilisables."]
+    : ["","Exigence modérée sur le temps de chiffrage. Privilégiez la justesse sur la rapidité."];
+
+  const dist=(k,arr)=>arr.map(v=>({v:v,n:R.filter(o=>o[k]===v).length})).filter(x=>x.n);
+  const barTab=(k,arr,titre)=>{const d=dist(k,arr); if(!d.length) return '<p class="hint">Non renseigné.</p>';
+    const mx=Math.max(...d.map(x=>x.n));
+    return `<div class="card"><table>${d.map(x=>`<tr><td style="width:210px">${esc(x.v)}</td>
+      <td><div class="bar-g"><i style="width:${x.n/mx*100}%"></i></div></td>
+      <td class="n"><b>${x.n}</b></td></tr>`).join("")}</table></div>`;};
+  const H_MID={"Moins d'1 h":0.5,"1 à 3 h":2,"3 à 8 h":5.5,"Plus de 8 h":10};
+  const moyH=(k)=>{const L=R.filter(o=>o[k]); return L.length? +(L.reduce((a,o)=>a+(H_MID[o[k]]||0),0)/L.length).toFixed(1) : 0;};
+  const barIn=(k,arr)=>{const d=dist(k,arr); if(!d.length) return '<span class="hint">—</span>';
+    const mx=Math.max(...d.map(x=>x.n));
+    return d.map(x=>`<div style="display:flex;align-items:center;gap:8px;margin-bottom:3px">
+      <span style="font-size:11.5px;color:var(--ink2);width:78px">${esc(x.v)}</span>
+      <span style="flex:1"><span class="bar-g" style="display:block"><i style="width:${x.n/mx*100}%"></i></span></span>
+      <span class="n" style="width:26px;font-size:11.5px">${x.n}</span></div>`).join("");};
+  const verbat=(k)=>{const L=R.filter(o=>o[k]);
+    return L.length? L.map(o=>`<div class="quote">${esc(o[k])}<em>${esc(nomComplet(o))}${o.stru?" · "+esc(o.stru):""}</em></div>`).join("")
+                   : '<p class="hint">Aucune réponse.</p>';};
+  const pri1c={}; R.forEach(o=>{ if(o.pri1) pri1c[o.pri1]=(pri1c[o.pri1]||0)+1; });
+  const pri1L=Object.keys(pri1c).map(c=>({c:c,n:pri1c[c],f:FEATS.find(f=>f.code===c)})).sort((a,b)=>b.n-a.n);
+  const pipeline=R.filter(o=>o.test==="Oui"||o.test==="Peut-être");
+  const libres=(k)=>R.filter(o=>o[k]).map(o=>`<div class="quote">${esc(o[k])}<em>${esc(nomComplet(o))}${o.stru?" · "+esc(o.stru):""}</em></div>`).join("")||'<p class="hint">Aucune réponse.</p>';
+
+  const ftab=(arr,col)=>arr.length?`<div class="card" style="padding:14px 8px"><table>
+    <tr><th>Fonctionnalité</th><th style="text-align:center">${col}</th><th style="text-align:center">État</th></tr>
+    ${arr.map(f=>`<tr><td><b>${f.code}</b> · ${esc(f.txt)}<br><em style="font-size:11.5px;color:var(--ink3)">${esc(f.mod)}</em></td>
+     <td class="n"><b>${col==="INUTILE"?f.inu:f.pri}</b>/${N}</td>
+     <td class="n"><span class="tag ${f.etat==="absent"?"abs":f.etat==="partiel"?"par":"ok"}">${f.etat==="absent"?"ABSENT":f.etat==="partiel"?"PARTIEL":"EXISTE"}</span></td></tr>`).join("")}
+    </table></div>`:'<p class="hint">Aucune fonctionnalité dans cette catégorie pour l\'instant.</p>';
+
+  // ── segmentation et fiabilité ──
+  const G=R.filter(gros), P=R.filter(o=>!gros(o));
+  const volT=R.reduce((a,o)=>a+volAn(o),0);
+  const dG=modDom(G), dP=modDom(P), pG=topPri(G,3), pP=topPri(P,3);
+  const champs=["nbproj","budget","delai","versions","sav","dif","c9","c10","c11","c12","prixmax","test","qui","direct"];
+  const compl=Math.round(R.reduce((a,o)=>{
+    const f=champs.filter(k=>o[k]).length + ((o.pri||[]).length?1:0) + (o.q6?1:0)
+          + (Object.values(o.pts||{}).some(v=>v>0)?1:0);
+    return a+f/(champs.length+3);
+  },0)/N*100);
+  const cent=R.filter(o=>Object.values(o.pts||{}).reduce((a,b)=>a+b,0)===100).length;
+  const sansQ6=R.filter(o=>!o.q6).length;
+  const testOui=R.filter(o=>o.test==="Oui").length;
+  const fiab = compl>=80 && cent>=N*0.8 ? ["","Échantillon exploitable."]
+             : compl>=60 ? ["warn","Échantillon partiellement exploitable : plusieurs questionnaires sont incomplets."]
+             : ["bad","Échantillon fragile : trop de questionnaires incomplets pour trancher."];
+
+  A.innerHTML = `
+  <div class="card"><div class="stat">
+    <div><b>${N}</b><span>RÉPONDANTS</span></div>
+    <div><b>${keur(volT)}</b><span>ÉQUIPEMENT / AN</span></div>
+    <div><b>${manque.length}</b><span>MANQUES À COMBLER</span></div>
+    <div><b>${retirer.length}</b><span>À RETIRER</span></div>
+    <div><b>${testOui}</b><span>PRÊTS À TESTER</span></div>
+  </div>${N<8?'<div class="warnbox" style="margin:14px 0 0">Sous huit répondants, lisez ces résultats comme des tendances. Poursuivez les entretiens avant de figer la feuille de route.</div>':""}</div>
+
+  <div class="sec">Synthèse exécutive</div>
+  <div class="verdict"><b>CE QUE DISENT ${N} ENTRETIEN${N>1?"S":""}</b>
+   Le besoin dominant est « ${esc(ord[0].nom)} » (${ord[0].v.toFixed(1)} points sur 100, contre ${ord[1].v.toFixed(1)} au deuxième).
+   ${manque.length? "<b>"+manque.length+" fonctionnalité"+(manque.length>1?"s sont réclamées":" est réclamée")+" par au moins un tiers du panel et n'existe"+(manque.length>1?"nt":"")+" pas encore</b> : c'est le chantier prioritaire." : "Aucun manque critique : ce qui est massivement demandé existe déjà, au moins partiellement."}
+   ${retirer.length? " À l'inverse, "+retirer.length+" fonctionnalité"+(retirer.length>1?"s peuvent sortir":" peut sortir")+" du périmètre — autant de développement économisé." : ""}
+   ${testOui? " <b>"+testOui+" prescripteur"+(testOui>1?"s se déclarent prêts":" se déclare prêt")+" à tester sur un projet réel</b> : c'est le seul engagement du questionnaire, et votre premier pipeline."
+            : " <b>Aucun répondant ne s'est déclaré prêt à tester.</b> Si cela persiste, c'est le signal le plus grave de l'étude : l'intérêt déclaré ne se transforme pas en engagement."}</div>
+
+  <div class="sec">Fiabilité de l'échantillon</div>
+  <div class="verdict ${fiab[0]}"><b>INDICE DE QUALITÉ</b>
+   Taux de complétion moyen : <b>${compl} %</b> · ${cent}/${N} arbitrage${cent>1?"s":""} des 100 points bouclé${cent>1?"s":""} · ${sansQ6? sansQ6+" questionnaire"+(sansQ6>1?"s sans":" sans")+" réponse à la question de rupture" : "tous ont répondu à la question de rupture"}.
+   ${fiab[1]}${sansQ6? " La question de rupture est la donnée la plus fiable du formulaire : les questionnaires qui n'y répondent pas perdent l'essentiel de leur valeur." : ""}</div>
+
+  <div class="sec">Segmentation — gros et petits prescripteurs</div>
+  <p class="hint">Un prescripteur à trois projets par an et un à quarante n'ont ni le même besoin ni la même disposition à payer. Une moyenne qui les confond fabrique un architecte moyen qui n'existe pas.</p>
+  <div class="card" style="padding:14px 8px"><table>
+   <tr><th>Segment</th><th style="text-align:center">RÉPONDANTS</th><th>FONCTION DOMINANTE</th><th>SES TROIS PRIORITÉS</th></tr>
+   <tr><td><b>Gros prescripteurs</b><br><em style="font-size:11.5px;color:var(--ink3)">plus de 15 projets/an ou plus de 50 k€ par projet</em></td>
+    <td class="n"><b>${G.length}</b></td>
+    <td>${dG?esc(dG.nom)+" · "+dG.v.toFixed(1):"—"}</td>
+    <td style="font-size:12.5px">${pG.length?pG.map(x=>"<b>"+x.c+"</b> "+(x.f?esc(x.f.txt):"")).join("<br>"):"—"}</td></tr>
+   <tr><td><b>Petits prescripteurs</b><br><em style="font-size:11.5px;color:var(--ink3)">le reste du panel</em></td>
+    <td class="n"><b>${P.length}</b></td>
+    <td>${dP?esc(dP.nom)+" · "+dP.v.toFixed(1):"—"}</td>
+    <td style="font-size:12.5px">${pP.length?pP.map(x=>"<b>"+x.c+"</b> "+(x.f?esc(x.f.txt):"")).join("<br>"):"—"}</td></tr>
+  </table></div>
+  ${(dG&&dP)?`<div class="verdict ${dG.nom!==dP.nom?"warn":""}"><b>LECTURE</b>${
+    dG.nom!==dP.nom
+    ? "Les deux segments ne demandent pas la même chose : « "+esc(dG.nom)+" » chez les gros prescripteurs, « "+esc(dP.nom)+" » chez les petits. Choisissez lequel vous servez en premier — les servir tous les deux au lancement, c'est n'en servir aucun correctement."
+    : "Les deux segments convergent sur « "+esc(dG.nom)+" ». C'est une bonne nouvelle : un seul produit peut les adresser."}</div>`:""}
+
+  <div class="sec">Ce qui manque à Hintvite</div>
+  <div class="verdict ${manque.length?"bad":""}"><b>DEMANDÉ ET ABSENT</b>
+   ${manque.length? manque.length+" fonctionnalité"+(manque.length>1?"s sont":" est")+" réclamée"+(manque.length>1?"s":"")+" par au moins un tiers des répondants et n'existe"+(manque.length>1?"nt":"")+" pas encore. C'est le chantier prioritaire de Hintvite."
+   : "Aucun manque critique identifié à ce stade : tout ce qui est massivement demandé existe déjà, au moins partiellement."}</div>
+  ${ftab(manque,"DEMANDES")}
+
+  <div class="sec">Ce qui existe mais ne suffit pas</div>
+  ${ftab(partiel,"DEMANDES")}
+
+  <div class="sec">Ce qui est déjà en place et confirmé</div>
+  ${ok.length?`<p class="hint">${ok.length} fonctionnalité${ok.length>1?"s":""} existante${ok.length>1?"s":""} et massivement demandée${ok.length>1?"s":""} — à mettre en avant dans votre discours commercial : ${ok.map(f=>f.code).join(", ")}.</p>`:'<p class="hint">Aucune pour l\'instant.</p>'}
+
+  <div class="sec">Ce qui peut sortir du périmètre</div>
+  ${ftab(retirer,"INUTILE")}
+
+  <div class="sec">L'arbitrage des 100 points</div>
+  <div class="card"><table>
+   ${ord.map(m=>`<tr><td style="width:210px">${m.l}. ${esc(m.nom)}</td>
+    <td><div class="bar-g"><i style="width:${Math.min(100,m.v*2)}%"></i></div></td>
+    <td class="n"><b>${m.v.toFixed(1)}</b></td></tr>`).join("")}
+  </table></div>
+  <div class="verdict"><b>LECTURE</b>${
+   ecart>=10 ? "Convergence nette sur « "+esc(ord[0].nom)+" » ("+ord[0].v.toFixed(1)+" points contre "+ord[1].v.toFixed(1)+"). Construisez ce module en entier avant d'en ouvrir un autre."
+   : ecart>=5 ? "Tendance marquée sur « "+esc(ord[0].nom)+" » ("+ord[0].v.toFixed(1)+" points), sans exclusivité. Commencez par là sans abandonner « "+esc(ord[1].nom)+" »."
+   : "Aucune fonction ne se détache ("+ord[0].v.toFixed(1)+" contre "+ord[1].v.toFixed(1)+"). Le besoin est diffus : c'est la question de rupture qui doit trancher."}
+   ${ord[6].v<=5?" À l'autre bout, « "+esc(ord[6].nom)+" » ("+ord[6].v.toFixed(1)+" points) peut sortir de la première version sans risque.":""}</div>
+
+  <div class="sec">Les marques à aller chercher</div>
+  <div class="verdict"><b>LA DONNÉE LA PLUS ACTIONNABLE</b>Les marques que les prescripteurs n'obtiennent pas en tarif professionnel désignent vos partenariats prioritaires. Chaque nom cité est un argument chiffré à présenter à la marque concernée : « ${N} architectes nous disent qu'ils ne peuvent pas vous prescrire faute d'accès. »</div>
+  ${verbat("mq2")}
+  <div class="sec">Les marques déjà prescrites</div>
+  ${verbat("mq1")}
+
+  <div class="sec">Ce que la plateforme a le droit d'afficher</div>
+  ${barTab("direct",DIR)}
+  <div class="verdict ${(R.filter(o=>o.direct==="3 à 5 sur 10"||o.direct==="Plus de 5 sur 10").length > N/3)?"bad":""}"><b>ACHAT DIRECT PAR LE CLIENT</b>${
+    R.filter(o=>o.direct==="3 à 5 sur 10"||o.direct==="Plus de 5 sur 10").length > N/3
+    ? "Le contournement est massif : au moins trois clients sur dix achètent en direct chez plus d'un tiers des répondants. La plateforme ne doit jamais exposer la marque, la référence ou le prix unitaire au client final sans que l'architecte l'ait décidé. Un outil qui expose sa marge est mort-né."
+    : "Le contournement reste marginal. Le masquage sélectif des marques et des prix unitaires demeure indispensable, mais il ne conditionne pas l'adoption."}</div>
+  <div class="sec">Qui passe la commande</div>
+  ${barTab("qui",QUI)}
+
+  <div class="sec">La douleur, en chiffres</div>
+  <div class="verdict"><b>DÉLAI ACTUEL POUR OBTENIR UN PRIX</b>C'est la mesure factuelle du problème que Hintvite prétend résoudre. Une promesse d'accès immédiat ne vaut que rapportée à ce délai.</div>
+  ${barTab("delai",DELAI)}
+  <div class="sec">Versions de chiffrage avant validation</div>
+  ${barTab("versions",VERS)}
+  <div class="verdict ${(R.filter(o=>o.versions==="3 versions"||o.versions==="4 versions ou plus").length > N/2)?"warn":""}"><b>LECTURE</b>${
+    R.filter(o=>o.versions==="3 versions"||o.versions==="4 versions ou plus").length > N/2
+    ? "Plus d'un répondant sur deux produit trois versions ou davantage. Le besoin central n'est alors pas le sourcing mais l'itération de chiffrage : dupliquer, comparer, réviser sans tout refaire."
+    : "Le nombre de versions reste contenu. L'itération de chiffrage n'est pas le point de douleur principal."}</div>
+  <div class="sec">La négociation — ce qu'elle coûte réellement</div>
+  ${barTab("negmode",NEGMODE)}
+  <div class="verdict ${(R.filter(o=>o.negmode==="Je négocie marque par marque").length>N/2)?"warn":""}"><b>MODE D'OBTENTION DES CONDITIONS</b>${
+    R.filter(o=>o.negmode==="Je négocie marque par marque").length>N/2
+    ? "Plus d'un prescripteur sur deux négocie marque par marque. Chaque projet repart de zéro : c'est du temps perdu à chaque fois, et la promesse d'un tarif professionnel affiché sans demande préalable devient centrale."
+    : (R.filter(o=>o.negmode==="Je n'obtiens pas de conditions professionnelles").length>N/3
+      ? "Une part notable du panel n'obtient aucune condition professionnelle. Ce ne sont pas des clients à convaincre : ce sont des prescripteurs actuellement exclus, et le premier à leur ouvrir l'accès les prend."
+      : "Les conditions sont majoritairement stabilisées. L'argument tarifaire seul ne suffira pas à faire basculer ce panel.")}</div>
+  ${barTab("negvar",NEGVAR)}
+
+  <div class="sec">Le temps perdu, en heures</div>
+  <div class="card"><table>
+   <tr><th>Poste</th><th>Répartition</th><th style="text-align:center">MOYENNE</th></tr>
+   <tr><td style="width:180px">Négociation des prix</td><td>${barIn("negh",HEURES)}</td><td class="n"><b>${moyH("negh")}</b> h</td></tr>
+   <tr><td>Service et après-vente</td><td>${barIn("sav",HEURES)}</td><td class="n"><b>${moyH("sav")}</b> h</td></tr>
+  </table></div>
+  <div class="verdict ${(moyH("negh")+moyH("sav")>=6)?"bad":((moyH("negh")+moyH("sav")>=3)?"warn":"")}"><b>CHARGE MENSUELLE CUMULÉE</b>
+   ${(moyH("negh")+moyH("sav")).toFixed(1)} heures par mois et par prescripteur, soit environ <b>${Math.round((moyH("negh")+moyH("sav"))*12/7)} journées de travail par an</b> consacrées à négocier et à réparer, non à concevoir.
+   ${(moyH("negh")+moyH("sav"))>=6
+     ? " C'est considérable. Chiffrez ce temps en euros dans votre argumentaire commercial : c'est le levier de conviction le plus direct dont vous disposiez."
+     : " La charge reste contenue : n'appuyez pas votre promesse principale sur ce terrain."}</div>
+
+  <div class="sec">Qui gère quand ça se passe mal</div>
+  ${barTab("savqui",SAVQUI)}
+  ${R.filter(o=>o.savqui==="Personne vraiment — ça traîne").length ? `<div class="verdict bad"><b>SIGNAL FORT</b>${R.filter(o=>o.savqui==="Personne vraiment — ça traîne").length} prescripteur(s) déclarent qu'aucun interlocuteur ne prend réellement le sujet. C'est un vide que personne n'occupe aujourd'hui — donc un espace où Hintvite peut créer de la valeur sans concurrent.</div>`:""}
+
+  <div class="sec">L'interlocuteur unique — le test décisif</div>
+  ${barTab("guichet",GUICHET)}
+  <div class="verdict ${(function(){const a=R.filter(o=>o.guichet==="Oui, à soi seul").length,b=R.filter(o=>o.guichet==="Cela compterait beaucoup").length;return (a+b)>N/2?(a>N/3?"":"warn"):"warn";})()}"><b>LECTURE</b>${(function(){
+    const a=R.filter(o=>o.guichet==="Oui, à soi seul").length;
+    const b=R.filter(o=>o.guichet==="Cela compterait beaucoup").length;
+    const c=R.filter(o=>o.guichet==="Ce serait un plus").length;
+    if(a>=N/3) return "<b>"+a+" prescripteur(s) sur "+N+" déclarent qu'un interlocuteur unique justifierait à lui seul de passer par la plateforme.</b> L'après-vente n'est pas un service annexe : c'est une porte d'entrée commerciale à part entière. Mettez-la en avant dès la page d'accueil, et non en dernière ligne de vos fonctionnalités.";
+    if(a+b>N/2) return "Le guichet unique compte beaucoup pour "+(a+b)+" prescripteur(s) sur "+N+", sans suffire seul à décider. C'est un argument de renfort puissant, à associer à l'accès aux prix plutôt qu'à le remplacer.";
+    return "Le guichet unique reste perçu comme un confort ("+c+" « un plus » sur "+N+"). Ne construisez pas votre promesse principale dessus : c'est une fonctionnalité de rétention, pas d'acquisition.";
+  })()}</div>
+
+  <div class="sec">Segmentation par volume</div>
+  ${barTab("nbproj",["1 à 5","6 à 15","16 à 30","Plus de 30"])}
+  ${barTab("budget",["Moins de 20 k€","20 à 50 k€","50 à 150 k€","Plus de 150 k€"])}
+  <p class="hint">Un prescripteur à trois projets par an et un à quarante n'ont pas le même produit ni la même disposition à payer. Vérifiez que vos moyennes ne mélangent pas ces deux populations.</p>
+
+  <div class="sec">La priorité absolue</div>
+  ${pri1L.length?`<div class="card"><table><tr><th>Fonctionnalité</th><th style="text-align:center">CITÉE 1ʳᵉ</th></tr>
+   ${pri1L.map(x=>`<tr><td><b>${x.c}</b> · ${x.f?esc(x.f.txt):""}</td><td class="n"><b>${x.n}</b>/${N}</td></tr>`).join("")}
+   </table></div>`:'<p class="hint">Non renseigné.</p>'}
+
+  <div class="sec">Le seuil de prix</div>
+  ${barTab("prixmax",PRIX)}
+
+  <div class="sec">Pipeline — prêts à tester</div>
+  ${pipeline.length?`<div class="card"><table><tr><th>Répondant</th><th>Contact</th><th>Réponse</th></tr>
+   ${pipeline.map(o=>`<tr><td><b>${esc(nomComplet(o))}</b><br><em style="font-size:11.5px;color:var(--ink3)">${esc(o.stru||"")}</em></td>
+    <td style="font-size:12.5px">${o.mail?esc(o.mail)+"<br>":""}${esc(o.tel||"")}</td>
+    <td><span class="tag ${o.test==="Oui"?"ok":"par"}">${esc(o.test.toUpperCase())}</span></td></tr>`).join("")}
+   </table></div><p class="hint">${pipeline.length} répondant${pipeline.length>1?"s":""} sur ${N} accepte${pipeline.length>1?"nt":""} un test réel. C'est le seul engagement du questionnaire, et votre premier pipeline commercial.</p>`
+   :'<p class="hint">Aucun répondant ne s\'est déclaré prêt à tester. Si cela persiste au-delà de huit entretiens, c\'est le signal le plus grave de toute l\'étude : l\'intérêt déclaré ne se transforme pas en engagement.</p>'}
+
+  <div class="sec">Confrères recommandés</div>
+  ${verbat("reco")}
+
+  <div class="sec">Le terrain</div>
+  <div class="verdict"><b>LE GISEMENT</b>L'univers le plus prescrit est <b>${esc(UNIVERS[iu1])}</b> (${u1[iu1]}/${N}).
+   Celui auquel les prescripteurs renoncent le plus est <b>${esc(UNIVERS[iu2])}</b> (${u2[iu2]}/${N}) — c'est là que Hintvite crée le plus de valeur, en leur ouvrant ce qu'ils abandonnent aujourd'hui.
+   La difficulté la plus citée est : <b>${esc(DIFF[idf])}</b> (${df[idf]}/${N}).</div>
+
+  <div class="sec">Les contraintes de modèle</div>
+  <div class="verdict ${vBiface[0]}"><b>PARTAGE AVEC LES MARQUES</b>${vBiface[1]}</div>
+  <div class="verdict ${vTarif[0]}"><b>TARIFICATION</b>${vTarif[1]}</div>
+  <div class="verdict ${vConf[0]}"><b>CONFIDENTIALITÉ</b>${vConf[1]}</div>
+  <div class="verdict ${vTemps[0]}"><b>TEMPS DE CHIFFRAGE</b>${vTemps[1]}</div>
+
+  <div class="sec">Ce dont l'absence les ferait renoncer</div>
+  <p class="hint">La donnée la plus fiable du questionnaire. Un thème revenant chez ${t3} répondants ou plus entre au socle, quel que soit son score ailleurs.</p>
+  ${libres("q6")}
+
+  <div class="sec">Ce qui manque à notre liste</div>
+  ${libres("q7")}
+
+  <div class="sec">Ce que la plateforme ne doit surtout pas faire</div>
+  ${libres("q8")}`;
+}
+
+function drawMarques(){
+  const R=DB.reps, N=R.length, M=document.getElementById("mq");
+  if(!N){ M.innerHTML='<div class="empty">Ce dossier se construira dès les premiers entretiens. Il repose sur deux questions : les marques prescrites et celles qui restent inaccessibles.</div>'; return; }
+  const volT=R.reduce((a,o)=>a+volAn(o),0);
+  const projT=R.reduce((a,o)=>a+(PROJ_MID[o.nbproj]||0),0);
+  const ko=marquesCitees(R,"mq2"), ok=marquesCitees(R,"mq1");
+  const u2=UNIVERS.map(u=>R.filter(o=>(o.u2||[]).indexOf(u)>-1).length);
+  const iu2=u2.indexOf(Math.max(...u2));
+
+  const tab=(L,titre,col)=>L.length?`<div class="card" style="padding:14px 8px"><table>
+    <tr><th>${titre}</th><th style="text-align:center">${col}</th><th style="text-align:center">PART DU PANEL</th><th style="text-align:center">VOLUME REPRÉSENTÉ</th></tr>
+    ${L.map(m=>`<tr><td><b>${esc(m.nom)}</b></td>
+      <td class="n"><b>${m.n}</b></td>
+      <td class="n">${Math.round(m.n/N*100)} %</td>
+      <td class="n">${m.vol?keur(m.vol)+"/an":"—"}</td></tr>`).join("")}
+    </table></div>`:'<p class="hint">Aucune marque citée pour l\'instant.</p>';
+
+  const pitch=(m)=>{
+    const conc=marquesCitees(m.reps,"mq1").slice(0,3).map(x=>x.nom);
+    return `<div class="verdict"><b>ARGUMENTAIRE — ${esc(m.nom.toUpperCase())}</b>
+      Sur un panel de ${N} prescripteur${N>1?"s":""} représentant environ <b>${keur(volT)} d'équipement prescrit par an</b>,
+      <b>${m.n}</b> déclare${m.n>1?"nt":""} ne pas pouvoir vous prescrire faute d'accès à un tarif professionnel.
+      ${m.vol?`Ces ${m.n} prescripteur${m.n>1?"s":""} pèsent à eux seuls <b>${keur(m.vol)} par an</b>. `:""}
+      ${conc.length?`Ils prescrivent aujourd'hui ${conc.map(c=>esc(c)).join(", ")}. `:""}
+      Hintvite vous propose de redevenir prescriptible auprès d'eux, sans coût d'acquisition et sans toucher à votre réseau de distribution.</div>`;
+  };
+
+  M.innerHTML=`
+  <div class="card"><div class="stat">
+    <div><b>${N}</b><span>PRESCRIPTEURS</span></div>
+    <div><b>${projT}</b><span>PROJETS PAR AN</span></div>
+    <div><b>${keur(volT)}</b><span>ÉQUIPEMENT PRESCRIT / AN</span></div>
+    <div><b>${ko.length}</b><span>MARQUES INACCESSIBLES</span></div>
+  </div>
+  <p class="hint" style="margin-top:12px">Volumes estimés à partir des tranches déclarées (nombre de projets × budget moyen). Ordre de grandeur, à présenter comme tel.</p></div>
+
+  <div class="sec">Les marques à aller chercher</div>
+  <div class="verdict bad"><b>LA DEMANDE EMPÊCHÉE</b>Chaque ligne ci-dessous est une marque que des prescripteurs voudraient utiliser et n'obtiennent pas. C'est votre liste de prospection, classée par nombre de demandes puis par volume représenté.</div>
+  ${tab(ko,"MARQUE INACCESSIBLE","PRESCRIPTEURS")}
+
+  <div class="sec">Argumentaires prêts à l'emploi</div>
+  ${ko.slice(0,4).map(pitch).join("")||'<p class="hint">Ils se rédigeront dès qu\'une marque sera citée.</p>'}
+
+  <div class="sec">Les marques déjà prescrites par le panel</div>
+  <p class="hint">À montrer pour établir la crédibilité du panel : ce sont les marques que ces prescripteurs placent aujourd'hui.</p>
+  ${tab(ok,"MARQUE PRESCRITE","PRESCRIPTEURS")}
+
+  <div class="sec">L'univers où la demande est le plus bloquée</div>
+  <div class="verdict"><b>${esc(UNIVERS[iu2].toUpperCase())}</b>${u2[iu2]} prescripteur${u2[iu2]>1?"s":""} sur ${N} déclarent y renoncer faute d'accès ou de maîtrise technique. C'est la catégorie où un partenariat marque crée le plus de valeur immédiate, parce que la demande existe déjà et qu'elle est aujourd'hui perdue.</div>
+
+  <div class="sec">Ce qu'il faut vérifier avant d'envoyer ce dossier</div>
+  <p class="hint">Les noms de marques sont extraits automatiquement du texte saisi. Une orthographe différente crée deux lignes distinctes — relisez la liste avant de l'utiliser, et harmonisez les saisies dans les fiches concernées.</p>`;
+}
+
+/* ---------- navigation ---------- */
+function go(id){
+  document.querySelectorAll(".page").forEach(p=>p.classList.toggle("on",p.id===id));
+  document.querySelectorAll("nav > button").forEach(b=>b.classList.toggle("on",b.dataset.go===id));
+  window.scrollTo({top:0});
+  document.getElementById("saveH").style.display = (id==="form") ? "" : "none";
+  if(id==="audit") drawAudit();
+  if(id==="marq") drawMarques();
+  if(id==="list") drawList();
+  if(id==="etat") drawEtat();
+}
+document.querySelectorAll("nav > button").forEach(b=>b.addEventListener("click",()=>go(b.dataset.go)));
+
+/* ---------- actions ---------- */
+function doSave(){
+  const o=read();
+  if(!o.nom){
+    alert("Indiquez au moins le nom du répondant.");
+    go("form");
+    document.getElementById("nom").scrollIntoView({behavior:"smooth",block:"center"});
+    document.getElementById("nom").focus();
+    return;
+  }
+  const maj = editIdx>-1;
+  if(maj) DB.reps[editIdx]=o; else DB.reps.push(o);
+  save(); clear(); drawList(); drawAudit();
+  toast(maj ? "Fiche mise à jour." : "Répondant enregistré — "+DB.reps.length+" au total.");
+  go("form");
+  window.scrollTo({top:0});
+}
+document.getElementById("save").addEventListener("click",doSave);
+document.getElementById("saveH").addEventListener("click",doSave);
+document.getElementById("reset").addEventListener("click",clear);
+
+document.getElementById("expj").addEventListener("click",()=>{
+  dl("hintvite-etude-"+new Date().toISOString().slice(0,10)+".json",
+     JSON.stringify(DB,null,2),"application/json");
+});
+document.getElementById("impj").addEventListener("click",()=>document.getElementById("file").click());
+document.getElementById("file").addEventListener("change",e=>{
+  const f=e.target.files[0]; if(!f) return;
+  const rd=new FileReader();
+  rd.onload=()=>{ try{
+    const d=JSON.parse(rd.result);
+    if(!d.reps) throw 0;
+    if(!DB.reps.length){
+      DB=d; toast(d.reps.length+" répondant"+(d.reps.length>1?"s importés":" importé")+".");
+    } else {
+      const fus = confirm(
+        "Ce fichier contient "+d.reps.length+" répondant(s).\n"+
+        "Vous en avez déjà "+DB.reps.length+".\n\n"+
+        "OK  →  AJOUTER les nouveaux aux vôtres (fusion)\n"+
+        "Annuler  →  REMPLACER entièrement vos données");
+      if(fus){
+        const cle=o=>((o.nom||"")+"|"+(o.prenom||"")+"|"+(o.mail||"")).toLowerCase().trim();
+        const vus=new Set(DB.reps.map(cle));
+        let add=0;
+        d.reps.forEach(o=>{ const k=cle(o); if(!vus.has(k)){ DB.reps.push(o); vus.add(k); add++; } });
+        Object.keys(d.etat||{}).forEach(k=>{ if(!DB.etat[k]) DB.etat[k]=d.etat[k]; });
+        const dbl=d.reps.length-add;
+        toast(add+" ajouté"+(add>1?"s":"")+(dbl?" · "+dbl+" doublon"+(dbl>1?"s ignorés":" ignoré"):"")+".");
+      } else {
+        DB=d; toast("Données remplacées par le fichier importé.");
+      }
+    }
+    save(); drawList(); drawAudit(); drawEtat(); go("list");
+  }catch(x){ alert("Fichier illisible ou format non reconnu."); } };
+  rd.readAsText(f); e.target.value="";
+});
+document.getElementById("expc").addEventListener("click",()=>{
+  const H=["Nom","Prénom","Téléphone","E-mail","Structure","Ville","Profession","Enquêteur","Date",
+    "Projets/an","Budget projet","Délai prix","Versions chiffrage",
+    "Mode de négociation","Conditions variables","Heures négo/mois","Heures SAV/mois","Qui gère le SAV","Guichet unique",
+    "Marques prescrites","Marques inaccessibles","Qui commande","Achat direct","Univers prescrits","Univers délaissés","Difficulté"]
+    .concat(MODULES.map(m=>"Pts "+m[0]))
+    .concat(["Priorités","Priorité n°1","Inutiles","Rupture","Manque","À éviter",
+             "Visibilité","Partage marques","Modèle","Temps","Prix max","Test 3 mois","Recommandation"]);
+  const rows=DB.reps.map(o=>[o.nom,o.prenom,o.tel,o.mail,o.stru,o.ville,o.metier,o.enq,o.date,
+    o.nbproj,o.budget,o.delai,o.versions,
+    o.negmode,o.negvar,o.negh,o.sav,o.savqui,o.guichet,
+    o.mq1,o.mq2,o.qui,o.direct,
+    (o.u1||[]).join(" | "),(o.u2||[]).join(" | "),o.dif]
+    .concat(MODULES.map(m=>(o.pts&&o.pts[m[0]])||0))
+    .concat([(o.pri||[]).join(" "),o.pri1,(o.inu||[]).join(" "),o.q6,o.q7,o.q8,
+             o.c9,o.c10,o.c11,o.c12,o.prixmax,o.test,o.reco]));
+  const csv=[H].concat(rows).map(r=>r.map(v=>'"'+String(v==null?"":v).replace(/"/g,'""')+'"').join(";")).join("\r\n");
+  dl("hintvite-reponses.csv","\uFEFF"+csv,"text/csv");
+});
+document.getElementById("wipe").addEventListener("click",()=>{
+  if(confirm("Effacer tous les répondants et l'état Hintvite ? Exportez d'abord une sauvegarde si besoin.")){
+    DB={reps:[],etat:{}}; save(); clear(); drawList(); drawAudit(); drawEtat(); go("form");
+  }
+});
+function dl(name,content,type){
+  const b=new Blob([content],{type:type+";charset=utf-8"}), u=URL.createObjectURL(b);
+  const a=document.createElement("a"); a.href=u; a.download=name; a.click();
+  setTimeout(()=>URL.revokeObjectURL(u),1500);
+}
+
+/* ---------- init ---------- */
+load(); banner(); total(); syncPri(); drawList(); drawEtat(); drawAudit(); drawMarques();
+})();
+</script>
+</body>
+</html>

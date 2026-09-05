@@ -1,0 +1,2 @@
+[functions.score-prospect]
+verify_jwt = true
