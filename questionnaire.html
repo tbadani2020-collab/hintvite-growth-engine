@@ -1071,17 +1071,35 @@ async function doSave(){
     return;
   }
   if(HV.MODE === 'public'){
-    if(!hvSupabase){ alert("Le questionnaire n'est pas encore connecté à Supabase. Vérifiez public/config.js."); return; }
-    const btn=document.getElementById('save'); const old=btn.textContent; btn.disabled=true; btn.textContent='Envoi…';
-    const { error } = await hvSupabase.from('questionnaire_responses').insert({
-      full_name: [o.prenom,o.nom].filter(Boolean).join(' '), first_name:o.prenom||null, last_name:o.nom||null,
-      email:o.mail||null, phone:o.tel||null, company:o.stru||null, city:o.ville||null, profession:o.metier||null,
-      payload:o, source:'hintvite_questionnaire'
+    if(!hvSupabase){
+      alert("Le questionnaire n'est pas encore connecté à Supabase. Vérifiez public/config.js.");
+      return;
+    }
+
+    const btn = document.getElementById('save');
+    const old = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = "Envoi...";
+
+    const { data, error } = await hvSupabase.functions.invoke('ingest-questionnaire', {
+      body: o
     });
-    btn.disabled=false; btn.textContent=old;
-    if(error){ console.error(error); alert("Impossible d'enregistrer la réponse. Réessayez ou contactez Hintvite."); return; }
-    clear(); alert("Merci. Votre réponse a bien été enregistrée."); window.scrollTo({top:0}); return;
+
+    btn.disabled = false;
+    btn.textContent = old;
+
+    if(error){
+      console.error(error);
+      alert("Impossible d'enregistrer la réponse. Réessayez ou contactez Hintvite.");
+      return;
+    }
+
+    clear();
+    alert("Merci. Votre réponse a bien été enregistrée.");
+    window.scrollTo({top:0});
+    return;
   }
+
   const maj = editIdx>-1;
   if(maj) DB.reps[editIdx]=o; else DB.reps.push(o);
   save(); clear(); drawList(); drawAudit();
