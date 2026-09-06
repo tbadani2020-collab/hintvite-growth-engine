@@ -1,6 +1,280 @@
-<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Hintvite — Growth Engine</title><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="./config.js"></script><style>body{font-family:Inter,Arial,sans-serif;background:#f5f3ef;color:#1f2726;margin:0}.wrap{max-width:1200px;margin:auto;padding:28px}.card{background:#fff;border:1px solid #ddd8cf;border-radius:14px;padding:20px;margin:14px 0}h1{margin:0 0 8px}button{background:#14544c;color:#fff;border:0;border-radius:8px;padding:10px 15px;cursor:pointer}input{padding:11px;border:1px solid #ccc;border-radius:8px;width:100%;box-sizing:border-box;margin:5px 0 10px}table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:10px;border-bottom:1px solid #eee;font-size:13px}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.stat b{display:block;font-size:28px}.muted{color:#6d756f;font-size:13px}.error{color:#9b3d2f}.hidden{display:none}@media(max-width:800px){.grid{grid-template-columns:1fr 1fr}}</style></head><body><main class="wrap"><div id="login" class="card"><h1>Hintvite Growth Engine</h1><p class="muted">Accès administrateur</p><input id="email" type="email" placeholder="Email"><input id="password" type="password" placeholder="Mot de passe"><button id="loginBtn">Se connecter</button><p id="msg" class="error"></p></div><div id="app" class="hidden"><div style="display:flex;justify-content:space-between;align-items:center"><div><h1>Hintvite Growth Engine</h1><div class="muted">Pilotage de la prospection et des réponses.</div></div><button id="logout">Déconnexion</button></div><div class="grid"><div class="card stat"><b id="r">0</b>réponses</div><div class="card stat"><b id="p">0</b>prospects</div><div class="card stat"><b id="hot">0</b>prospects prioritaires</div><div class="card stat"><b id="m">0</b>marques</div></div><div class="card"><h2>Réponses questionnaire</h2><table><thead><tr><th>Date</th><th>Nom</th><th>Cabinet</th><th>Ville</th><th>Test</th><th>Email</th></tr></thead><tbody id="responses"></tbody></table></div><div class="card"><h2>Prospects</h2><table><thead><tr><th>Cabinet</th><th>Contact</th><th>Ville</th><th>Score</th><th>Statut</th><th>Dernier contact</th></tr></thead><tbody id="prospects"></tbody></table></div></div></main><script>
-const C=window.HINTVITE_CONFIG||{};const sb=window.supabase.createClient(C.SUPABASE_URL,C.SUPABASE_PUBLISHABLE_KEY);const $=id=>document.getElementById(id);
-async function refresh(){const [{data:r},{data:p},{data:b}]=await Promise.all([sb.from('questionnaire_responses').select('*').order('created_at',{ascending:false}).limit(100),sb.from('prospects').select('*').order('score',{ascending:false}).limit(100),sb.from('brands').select('id')]);$('r').textContent=r?.length||0;$('p').textContent=p?.length||0;$('hot').textContent=(p||[]).filter(x=>(x.score||0)>=80).length;$('m').textContent=b?.length||0;$('responses').innerHTML=(r||[]).map(x=>`<tr><td>${new Date(x.created_at).toLocaleDateString('fr-FR')}</td><td>${x.full_name||''}</td><td>${x.company||''}</td><td>${x.city||''}</td><td>${x.payload?.test||''}</td><td>${x.email||''}</td></tr>`).join('');$('prospects').innerHTML=(p||[]).map(x=>`<tr><td>${x.company||''}</td><td>${x.contact_name||''}</td><td>${x.city||''}</td><td><b>${x.score??'—'}</b></td><td>${x.status||''}</td><td>${x.last_contact_at?new Date(x.last_contact_at).toLocaleDateString('fr-FR'):'—'}</td></tr>`).join('')}
-sb.auth.onAuthStateChange(async(_,s)=>{if(s){$('login').classList.add('hidden');$('app').classList.remove('hidden');await refresh();}else{$('login').classList.remove('hidden');$('app').classList.add('hidden')}});
-$('loginBtn').onclick=async()=>{const {error}=await sb.auth.signInWithPassword({email:$('email').value,password:$('password').value});if(error)$('msg').textContent=error.message};$('logout').onclick=()=>sb.auth.signOut();
-</script></body></html>
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Hintvite — Growth Engine</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+body{margin:0;background:#f6f7f9;color:#171717;font-family:Arial,sans-serif}
+header{background:#111;color:white;padding:22px 32px;display:flex;justify-content:space-between;align-items:center}
+header h1{margin:0;font-size:22px}
+button{border:0;border-radius:8px;padding:10px 15px;cursor:pointer}
+.primary{background:#111;color:white}
+main{max-width:1400px;margin:30px auto;padding:0 20px}
+.login,.dashboard{background:white;border-radius:14px;padding:25px;box-shadow:0 2px 12px #0000000d}
+.login{max-width:420px;margin:80px auto}
+input,select{width:100%;box-sizing:border-box;padding:11px;border:1px solid #ddd;border-radius:8px;margin:6px 0 14px}
+.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:15px;margin-bottom:25px}
+.card{background:white;padding:20px;border-radius:12px;box-shadow:0 2px 12px #0000000d}
+.card strong{display:block;font-size:30px;margin-top:8px}
+.filters{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:12px;margin-bottom:20px}
+table{width:100%;border-collapse:collapse}
+th,td{text-align:left;padding:13px 10px;border-bottom:1px solid #eee;font-size:14px}
+th{background:#fafafa}
+.score{font-weight:bold}
+.high{color:#16803c}
+.medium{color:#9a6700}
+.low{color:#777}
+.badge{padding:5px 8px;border-radius:20px;background:#eee;font-size:12px}
+.error{color:#c62828;margin-top:10px}
+.hidden{display:none}
+.small{color:#777;font-size:13px}
+@media(max-width:900px){.cards{grid-template-columns:repeat(2,1fr)}.filters{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+
+<body>
+
+<header>
+<h1>HINTVITE · Growth Engine</h1>
+<button onclick="logout()">Déconnexion</button>
+</header>
+
+<main>
+
+<section id="login" class="login">
+<h2>Connexion</h2>
+
+<label>Email</label>
+<input id="email" type="email" placeholder="admin@hintvite.fr">
+
+<label>Mot de passe</label>
+<input id="password" type="password">
+
+<button class="primary" onclick="login()">Se connecter</button>
+
+<div id="loginError" class="error"></div>
+</section>
+
+<section id="app" class="hidden">
+
+<div class="cards">
+<div class="card">
+<div>Total prospects</div>
+<strong id="total">0</strong>
+</div>
+
+<div class="card">
+<div>Prospects qualifiés</div>
+<strong id="qualified">0</strong>
+</div>
+
+<div class="card">
+<div>Score ≥ 80</div>
+<strong id="hot">0</strong>
+</div>
+
+<div class="card">
+<div>Nouveaux</div>
+<strong id="newCount">0</strong>
+</div>
+</div>
+
+<div class="dashboard">
+
+<h2>Prospects</h2>
+<p class="small">Radar + questionnaire + scoring IA</p>
+
+<div class="filters">
+<input id="search" placeholder="Rechercher une entreprise, contact, ville..." oninput="render()">
+
+<select id="status" onchange="render()">
+<option value="">Tous les statuts</option>
+<option value="new">Nouveaux</option>
+<option value="qualified">Qualifiés</option>
+<option value="contacted">Contactés</option>
+<option value="replied">Réponses</option>
+<option value="meeting">Rendez-vous</option>
+<option value="pilot">Pilotes</option>
+<option value="active">Actifs</option>
+<option value="nurture">Nurture</option>
+<option value="lost">Perdus</option>
+</select>
+
+<select id="scoreFilter" onchange="render()">
+<option value="">Tous les scores</option>
+<option value="80">80+</option>
+<option value="60">60+</option>
+<option value="40">40+</option>
+</select>
+
+<button class="primary" onclick="loadProspects()">↻ Actualiser</button>
+</div>
+
+<table>
+<thead>
+<tr>
+<th>Entreprise</th>
+<th>Contact</th>
+<th>Ville</th>
+<th>Spécialités</th>
+<th>Score</th>
+<th>Statut</th>
+<th>Source</th>
+</tr>
+</thead>
+
+<tbody id="prospects"></tbody>
+</table>
+
+<p id="empty" class="small"></p>
+
+</div>
+</section>
+
+</main>
+
+<script src="config.js"></script>
+
+<script>
+const C = window.HINTVITE_CONFIG || {};
+const sb = window.supabase.createClient(
+  C.SUPABASE_URL,
+  C.SUPABASE_PUBLISHABLE_KEY
+);
+
+let prospects = [];
+
+async function login(){
+  const email=document.getElementById('email').value;
+  const password=document.getElementById('password').value;
+
+  const {error}=await sb.auth.signInWithPassword({email,password});
+
+  if(error){
+    document.getElementById('loginError').textContent=error.message;
+    return;
+  }
+
+  document.getElementById('loginError').textContent='';
+  showApp();
+  loadProspects();
+}
+
+async function logout(){
+  await sb.auth.signOut();
+  document.getElementById('app').classList.add('hidden');
+  document.getElementById('login').classList.remove('hidden');
+}
+
+function showApp(){
+  document.getElementById('login').classList.add('hidden');
+  document.getElementById('app').classList.remove('hidden');
+}
+
+async function loadProspects(){
+
+  const {data,error}=await sb
+    .from('prospects')
+    .select('*')
+    .order('score',{ascending:false,nullsFirst:false})
+    .order('created_at',{ascending:false});
+
+  if(error){
+    alert('Erreur chargement prospects : '+error.message);
+    return;
+  }
+
+  prospects=data || [];
+
+  document.getElementById('total').textContent=prospects.length;
+
+  document.getElementById('qualified').textContent=
+    prospects.filter(p=>p.status==='qualified').length;
+
+  document.getElementById('hot').textContent=
+    prospects.filter(p=>(p.score||0)>=80).length;
+
+  document.getElementById('newCount').textContent=
+    prospects.filter(p=>p.status==='new').length;
+
+  render();
+}
+
+function render(){
+
+  const search=(document.getElementById('search').value||'').toLowerCase();
+  const status=document.getElementById('status').value;
+  const minScore=Number(document.getElementById('scoreFilter').value||0);
+
+  const filtered=prospects.filter(p=>{
+
+    const text=[
+      p.company,
+      p.contact_name,
+      p.first_name,
+      p.last_name,
+      p.city,
+      ...(p.specialties||[])
+    ].join(' ').toLowerCase();
+
+    return (!search || text.includes(search))
+      && (!status || p.status===status)
+      && ((p.score||0)>=minScore);
+  });
+
+  const tbody=document.getElementById('prospects');
+
+  tbody.innerHTML=filtered.map(p=>{
+
+    const score=p.score ?? '—';
+
+    let cls='low';
+    if(score>=80) cls='high';
+    else if(score>=60) cls='medium';
+
+    const contact=p.contact_name ||
+      [p.first_name,p.last_name].filter(Boolean).join(' ') ||
+      '—';
+
+    const specialties=(p.specialties||[]).join(', ') || '—';
+
+    return `
+      <tr>
+        <td><strong>${esc(p.company||'—')}</strong></td>
+        <td>${esc(contact)}</td>
+        <td>${esc(p.city||'—')}</td>
+        <td>${esc(specialties)}</td>
+        <td class="score ${cls}">${score}</td>
+        <td><span class="badge">${esc(p.status||'new')}</span></td>
+        <td>${esc(p.source||'—')}</td>
+      </tr>
+    `;
+
+  }).join('');
+
+  document.getElementById('empty').textContent=
+    filtered.length ? '' : 'Aucun prospect ne correspond aux filtres.';
+}
+
+function esc(value){
+  return String(value)
+    .replaceAll('&','&amp;')
+    .replaceAll('<','&lt;')
+    .replaceAll('>','&gt;')
+    .replaceAll('"','&quot;')
+    .replaceAll("'","&#039;");
+}
+
+sb.auth.getSession().then(({data})=>{
+  if(data.session){
+    showApp();
+    loadProspects();
+  }
+});
+</script>
+
+</body>
+</html>
