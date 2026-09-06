@@ -214,8 +214,20 @@ th{background:#fafafa}
 </div>
 
 <div class="actions">
-<button class="primary" onclick="markContacted()">Marquer comme contacté</button>
+<button class="primary" onclick="generateMessage()">✦ Générer le message IA</button>
+<button onclick="markContacted()">Marquer comme contacté</button>
 <button onclick="requalify()">Recalculer le score IA</button>
+</div>
+
+<div id="aiMessageBox" class="detail-box full hidden">
+<h3>Message commercial proposé par l'IA</h3>
+<textarea id="aiMessage" style="width:100%;min-height:180px;box-sizing:border-box;padding:12px;border:1px solid #ddd;border-radius:8px;font-family:Arial,sans-serif;font-size:14px"></textarea>
+
+<div class="actions">
+<button class="primary" onclick="copyAiMessage()">Copier le message</button>
+</div>
+
+<div id="aiMessageStatus" class="small"></div>
 </div>
 
 <div id="detailMessage" class="small"></div>
