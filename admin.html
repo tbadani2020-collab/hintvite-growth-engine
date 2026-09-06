@@ -363,13 +363,15 @@ function render(){
       </tr>
     `;
 
-  document.querySelectorAll('.prospect-row').forEach(row=>{
+ }).join('');
+
+document.querySelectorAll('.prospect-row').forEach(row=>{
   row.addEventListener('click',()=>{
     openProspect(row.dataset.id);
   });
 });
 
-  document.getElementById('empty').textContent=
+document.getElementById('empty').textContent=
     filtered.length ? '' : 'Aucun prospect ne correspond aux filtres.';
 }
 
