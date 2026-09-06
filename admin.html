@@ -223,7 +223,7 @@ th{background:#fafafa}
 <h3>Message commercial proposé par l'IA</h3>
 <textarea id="aiMessage" style="width:100%;min-height:180px;box-sizing:border-box;padding:12px;border:1px solid #ddd;border-radius:8px;font-family:Arial,sans-serif;font-size:14px"></textarea>
 
-<div class="actions">
+<div class="actions"> 
 <button class="primary" onclick="copyAiMessage()">Copier le message</button> 
 <button onclick="sendEmail()">✉ Envoyer l’email</button>
 </div>
@@ -543,8 +543,7 @@ async function generateMessage(){
   status.textContent='Génération du message IA en cours...';
 
   const {data,error}=await sb.functions.invoke(
-    'smart-handler',
-    {
+'generate-message ,    {
       body:{
         prospect_id:currentProspect.id
       }
@@ -567,6 +566,48 @@ async function generateMessage(){
   status.textContent='Message généré avec succès.';
 }
 
+async function sendEmail(){
+
+  if(!currentProspect) return;
+
+  const message = document.getElementById('aiMessage').value;
+  const status = document.getElementById('aiMessageStatus');
+
+  if(!message){
+    status.textContent = 'Générez d’abord le message IA.';
+    return;
+  }
+
+  if(!currentProspect.email){
+    status.textContent = 'Ce prospect n’a pas d’adresse email.';
+    return;
+  }
+
+  status.textContent = 'Envoi de l’email en cours...';
+
+  const { data, error } = await sb.functions.invoke(
+    'quick-endpoint',
+    {
+      body: {
+        prospect_id: currentProspect.id,
+        message: message,
+        subject: `HINTVITE × ${currentProspect.company || 'votre agence'}`
+      }
+    }
+  );
+
+  if(error){
+    status.textContent = 'Erreur : ' + error.message;
+    return;
+  }
+
+  if(!data || !data.ok){
+    status.textContent = 'Erreur lors de l’envoi.';
+    return;
+  }
+
+  status.textContent = '✓ Email envoyé à ' + currentProspect.email;
+}
 async function copyAiMessage(){
 
   const textarea=document.getElementById('aiMessage');
