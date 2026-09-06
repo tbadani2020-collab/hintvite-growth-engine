@@ -543,7 +543,7 @@ async function generateMessage(){
   status.textContent='Génération du message IA en cours...';
 
   const {data,error}=await sb.functions.invoke(
-'generate-message ,    {
+'generate-message',   {
       body:{
         prospect_id:currentProspect.id
       }
