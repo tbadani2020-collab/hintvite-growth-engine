@@ -13,7 +13,7 @@ header h1{margin:0;font-size:22px}
 button{border:0;border-radius:8px;padding:10px 15px;cursor:pointer}
 .primary{background:#111;color:white}
 main{max-width:1400px;margin:30px auto;padding:0 20px}
-.login,.dashboard{background:white;border-radius:14px;padding:25px;box-shadow:0 2px 12px #0000000d}
+.login,.dashboard,.detail{background:white;border-radius:14px;padding:25px;box-shadow:0 2px 12px #0000000d}
 .login{max-width:420px;margin:80px auto}
 input,select{width:100%;box-sizing:border-box;padding:11px;border:1px solid #ddd;border-radius:8px;margin:6px 0 14px}
 .cards{display:grid;grid-template-columns:repeat(4,1fr);gap:15px;margin-bottom:25px}
@@ -31,7 +31,23 @@ th{background:#fafafa}
 .error{color:#c62828;margin-top:10px}
 .hidden{display:none}
 .small{color:#777;font-size:13px}
-@media(max-width:900px){.cards{grid-template-columns:repeat(2,1fr)}.filters{grid-template-columns:1fr 1fr}}
+.link{color:#111;text-decoration:underline}
+.prospect-row{cursor:pointer}
+.prospect-row:hover{background:#fafafa}
+.back{margin-bottom:20px}
+.detail-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px}
+.detail-box{background:#fafafa;border-radius:10px;padding:18px}
+.detail-box h3{margin-top:0}
+.detail-box.full{grid-column:1/-1}
+.detail-box p{margin:7px 0}
+.detail-title{font-size:28px;margin:0 0 6px}
+.detail-subtitle{color:#777;margin:0 0 25px}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px}
+@media(max-width:900px){
+.cards{grid-template-columns:repeat(2,1fr)}
+.filters{grid-template-columns:1fr 1fr}
+.detail-grid{grid-template-columns:1fr}
+}
 </style>
 </head>
 
@@ -59,6 +75,8 @@ th{background:#fafafa}
 </section>
 
 <section id="app" class="hidden">
+
+<div id="listView">
 
 <div class="cards">
 <div class="card">
@@ -101,6 +119,7 @@ th{background:#fafafa}
 <option value="active">Actifs</option>
 <option value="nurture">Nurture</option>
 <option value="lost">Perdus</option>
+<option value="do_not_contact">Ne pas contacter</option>
 </select>
 
 <select id="scoreFilter" onchange="render()">
@@ -132,6 +151,78 @@ th{background:#fafafa}
 <p id="empty" class="small"></p>
 
 </div>
+</div>
+
+<div id="detailView" class="hidden">
+
+<button class="back" onclick="showList()">← Retour aux prospects</button>
+
+<div class="detail">
+
+<h2 id="detailCompany" class="detail-title"></h2>
+<p id="detailSubtitle" class="detail-subtitle"></p>
+
+<div class="detail-grid">
+
+<div class="detail-box">
+<h3>Contact</h3>
+<p><strong>Nom :</strong> <span id="detailContact"></span></p>
+<p><strong>Email :</strong> <span id="detailEmail"></span></p>
+<p><strong>Téléphone :</strong> <span id="detailPhone"></span></p>
+</div>
+
+<div class="detail-box">
+<h3>Présence en ligne</h3>
+<p><strong>Site :</strong> <span id="detailWebsite"></span></p>
+<p><strong>LinkedIn :</strong> <span id="detailLinkedin"></span></p>
+<p><strong>Instagram :</strong> <span id="detailInstagram"></span></p>
+</div>
+
+<div class="detail-box">
+<h3>Qualification</h3>
+<p><strong>Ville :</strong> <span id="detailCity"></span></p>
+<p><strong>Score :</strong> <span id="detailScore"></span></p>
+<p><strong>Statut :</strong> <span id="detailStatus"></span></p>
+<p><strong>Source :</strong> <span id="detailSource"></span></p>
+</div>
+
+<div class="detail-box">
+<h3>Spécialités</h3>
+<p id="detailSpecialties"></p>
+</div>
+
+<div class="detail-box full">
+<h3>Signaux projets</h3>
+<p id="detailProjects"></p>
+</div>
+
+<div class="detail-box full">
+<h3>Marques détectées</h3>
+<p id="detailBrands"></p>
+</div>
+
+<div class="detail-box full">
+<h3>Résumé IA</h3>
+<p id="detailSummary"></p>
+</div>
+
+<div class="detail-box full">
+<h3>Pourquoi ce score ?</h3>
+<p id="detailReason"></p>
+</div>
+
+</div>
+
+<div class="actions">
+<button class="primary" onclick="markContacted()">Marquer comme contacté</button>
+<button onclick="requalify()">Recalculer le score IA</button>
+</div>
+
+<div id="detailMessage" class="small"></div>
+
+</div>
+</div>
+
 </section>
 
 </main>
@@ -140,14 +231,17 @@ th{background:#fafafa}
 
 <script>
 const C = window.HINTVITE_CONFIG || {};
+
 const sb = window.supabase.createClient(
   C.SUPABASE_URL,
   C.SUPABASE_PUBLISHABLE_KEY
 );
 
 let prospects = [];
+let currentProspect = null;
 
 async function login(){
+
   const email=document.getElementById('email').value;
   const password=document.getElementById('password').value;
 
@@ -164,12 +258,15 @@ async function login(){
 }
 
 async function logout(){
+
   await sb.auth.signOut();
+
   document.getElementById('app').classList.add('hidden');
   document.getElementById('login').classList.remove('hidden');
 }
 
 function showApp(){
+
   document.getElementById('login').classList.add('hidden');
   document.getElementById('app').classList.remove('hidden');
 }
@@ -232,6 +329,7 @@ function render(){
     const score=p.score ?? '—';
 
     let cls='low';
+
     if(score>=80) cls='high';
     else if(score>=60) cls='medium';
 
@@ -242,7 +340,7 @@ function render(){
     const specialties=(p.specialties||[]).join(', ') || '—';
 
     return `
-      <tr>
+      <tr class="prospect-row" onclick="openProspect('${p.id}')">
         <td><strong>${esc(p.company||'—')}</strong></td>
         <td>${esc(contact)}</td>
         <td>${esc(p.city||'—')}</td>
@@ -259,7 +357,163 @@ function render(){
     filtered.length ? '' : 'Aucun prospect ne correspond aux filtres.';
 }
 
+function openProspect(id){
+
+  const p=prospects.find(x=>x.id===id);
+
+  if(!p) return;
+
+  currentProspect=p;
+
+  document.getElementById('listView').classList.add('hidden');
+  document.getElementById('detailView').classList.remove('hidden');
+
+  const contact=p.contact_name ||
+    [p.first_name,p.last_name].filter(Boolean).join(' ') ||
+    '—';
+
+  document.getElementById('detailCompany').textContent=p.company || '—';
+
+  document.getElementById('detailSubtitle').textContent=
+    [p.city,p.company_size].filter(Boolean).join(' · ') || 'Prospect';
+
+  document.getElementById('detailContact').textContent=contact;
+  document.getElementById('detailEmail').textContent=p.email || '—';
+  document.getElementById('detailPhone').textContent=p.phone || '—';
+
+  setLink('detailWebsite',p.website);
+  setLink('detailLinkedin',p.linkedin_url);
+  setLink('detailInstagram',p.instagram_url);
+
+  document.getElementById('detailCity').textContent=p.city || '—';
+  document.getElementById('detailScore').textContent=p.score ?? '—';
+  document.getElementById('detailStatus').textContent=p.status || 'new';
+  document.getElementById('detailSource').textContent=p.source || '—';
+
+  document.getElementById('detailSpecialties').textContent=
+    (p.specialties||[]).join(', ') || '—';
+
+  document.getElementById('detailProjects').textContent=
+    p.project_signals || '—';
+
+  document.getElementById('detailBrands').textContent=
+    (p.brands_detected||[]).join(', ') || '—';
+
+  document.getElementById('detailSummary').textContent=
+    p.ai_summary || 'Aucun résumé IA disponible.';
+
+  document.getElementById('detailReason').textContent=
+    p.score_reason || 'Aucune justification disponible.';
+
+  document.getElementById('detailMessage').textContent='';
+}
+
+function setLink(id,url){
+
+  const el=document.getElementById(id);
+
+  if(url){
+
+    el.innerHTML=
+      '<a class="link" href="'+esc(url)+'" target="_blank" rel="noopener">'+
+      esc(url)+
+      '</a>';
+
+  }else{
+
+    el.textContent='—';
+  }
+}
+
+function showList(){
+
+  document.getElementById('detailView').classList.add('hidden');
+  document.getElementById('listView').classList.remove('hidden');
+
+  currentProspect=null;
+}
+
+async function markContacted(){
+
+  if(!currentProspect) return;
+
+  const {error}=await sb
+    .from('prospects')
+    .update({
+      status:'contacted',
+      last_contact_at:new Date().toISOString()
+    })
+    .eq('id',currentProspect.id);
+
+  if(error){
+
+    document.getElementById('detailMessage').textContent=
+      'Erreur : '+error.message;
+
+    return;
+  }
+
+  currentProspect.status='contacted';
+
+  document.getElementById('detailStatus').textContent='contacted';
+
+  document.getElementById('detailMessage').textContent=
+    'Prospect marqué comme contacté.';
+
+  loadProspects();
+}
+
+async function requalify(){
+
+  if(!currentProspect) return;
+
+  document.getElementById('detailMessage').textContent=
+    'Recalcul du score IA en cours...';
+
+  const {data,error}=await sb.functions.invoke(
+    'score-prospect',
+    {
+      body:{prospect_id:currentProspect.id}
+    }
+  );
+
+  if(error){
+
+    document.getElementById('detailMessage').textContent=
+      'Erreur : '+error.message;
+
+    return;
+  }
+
+  await loadProspects();
+
+  const updated=prospects.find(
+    p=>p.id===currentProspect.id
+  );
+
+  if(updated){
+
+    currentProspect=updated;
+
+    document.getElementById('detailScore').textContent=
+      updated.score ?? '—';
+
+    document.getElementById('detailStatus').textContent=
+      updated.status || 'new';
+
+    document.getElementById('detailSummary').textContent=
+      updated.ai_summary || '—';
+
+    document.getElementById('detailReason').textContent=
+      updated.score_reason || '—';
+  }
+
+  document.getElementById('detailMessage').textContent=
+    'Score IA recalculé.';
+}
+
 function esc(value){
+
   return String(value)
     .replaceAll('&','&amp;')
     .replaceAll('<','&lt;')
@@ -269,10 +523,13 @@ function esc(value){
 }
 
 sb.auth.getSession().then(({data})=>{
+
   if(data.session){
+
     showApp();
     loadProspects();
   }
+
 });
 </script>
 
