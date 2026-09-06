@@ -527,7 +527,54 @@ async function requalify(){
   document.getElementById('detailMessage').textContent=
     'Score IA recalculé.';
 }
+async function generateMessage(){
 
+  if(!currentProspect) return;
+
+  const box=document.getElementById('aiMessageBox');
+  const textarea=document.getElementById('aiMessage');
+  const status=document.getElementById('aiMessageStatus');
+
+  box.classList.remove('hidden');
+  textarea.value='';
+  status.textContent='Génération du message IA en cours...';
+
+  const {data,error}=await sb.functions.invoke(
+    'smart-handler',
+    {
+      body:{
+        prospect_id:currentProspect.id
+      }
+    }
+  );
+
+  if(error){
+
+    status.textContent='Erreur : '+error.message;
+    return;
+  }
+
+  if(!data || !data.message){
+
+    status.textContent='Aucun message généré.';
+    return;
+  }
+
+  textarea.value=data.message;
+  status.textContent='Message généré avec succès.';
+}
+
+async function copyAiMessage(){
+
+  const textarea=document.getElementById('aiMessage');
+  const status=document.getElementById('aiMessageStatus');
+
+  if(!textarea.value) return;
+
+  await navigator.clipboard.writeText(textarea.value);
+
+  status.textContent='Message copié.';
+}
 function esc(value){
 
   return String(value)
