@@ -98,6 +98,10 @@ th{background:#fafafa}
 <div>Nouveaux</div>
 <strong id="newCount">0</strong>
 </div>
+<div class="card">
+  <div>À relancer aujourd’hui</div>
+  <strong id="dueCount">0</strong>
+</div>
 </div>
 
 <div class="dashboard">
@@ -316,7 +320,11 @@ async function loadProspects(){
 
   document.getElementById('newCount').textContent=
     prospects.filter(p=>p.status==='new').length;
-
+document.getElementById('dueCount').textContent =
+  prospects.filter(p =>
+    p.next_action_at &&
+    new Date(p.next_action_at) <= new Date()
+  ).length;
   render();
 }
 
