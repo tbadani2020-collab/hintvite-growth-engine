@@ -627,8 +627,9 @@ async function generateFollowUp(){
   box.classList.remove('hidden');
   textarea.value='';
   status.textContent='Génération de la relance IA en cours...';
-
-  const {data,error}=await sb.functions.invoke(
+if(currentProspect.last_contact_at){
+  status.textContent='Génération d’une relance personnalisée en cours...';
+}  const {data,error}=await sb.functions.invoke(
     'generate-message',
     {
       body:{
