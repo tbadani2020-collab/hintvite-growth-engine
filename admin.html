@@ -226,7 +226,7 @@ th{background:#fafafa}
 </div>
 <div class="actions">
 <button class="primary" onclick="generateMessage()">✦ Générer le message IA</button>
-<button onclick="generateFollowUp()">Générer la relance</button>
+<button onclick="generateFollowUp()">↻ Générer la relance IA</button>
 <button onclick="markContacted()">Marquer comme contacté</button>
 <button onclick="requalify()">Recalculer le score IA</button>
 </div>
@@ -681,7 +681,17 @@ if(currentProspect.last_contact_at){
       }
     }
   );
+if(!error && currentProspect.last_contact_at){
+  await sb
+    .from('prospects')
+    .update({
+      follow_up_count: (currentProspect.follow_up_count || 0) + 1
+    })
+    .eq('id', currentProspect.id);
 
+  currentProspect.follow_up_count =
+    (currentProspect.follow_up_count || 0) + 1;
+}
   if(error){
     status.textContent = 'Erreur : ' + error.message;
     return;
