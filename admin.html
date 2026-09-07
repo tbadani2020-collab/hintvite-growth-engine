@@ -128,7 +128,10 @@ th{background:#fafafa}
 <option value="60">60+</option>
 <option value="40">40+</option>
 </select>
-
+<select id="followUpFilter" onchange="render()">
+  <option value="">Toutes les actions</option>
+  <option value="due">À relancer</option>
+</select>
 <button class="primary" onclick="loadProspects()">↻ Actualiser</button>
 </div>
 
@@ -322,7 +325,7 @@ function render(){
   const search=(document.getElementById('search').value||'').toLowerCase();
   const status=document.getElementById('status').value;
   const minScore=Number(document.getElementById('scoreFilter').value||0);
-
+  const followUp=document.getElementById('followUpFilter')?.value||'';
   const filtered=prospects.filter(p=>{
 
     const text=[
@@ -336,7 +339,11 @@ function render(){
 
     return (!search || text.includes(search))
       && (!status || p.status===status)
-      && ((p.score||0)>=minScore);
+     && ((p.score||0)>=minScore)
+     && (!followUp ||
+    (followUp==='due' &&
+     p.next_action_at &&
+     new Date(p.next_action_at)<=new Date()));
   });
 
   const tbody=document.getElementById('prospects');
