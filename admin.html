@@ -427,10 +427,42 @@ function openProspect(id){
 
   document.getElementById('detailReason').textContent=
     p.score_reason || 'Aucune justification disponible.';
+document.getElementById('detailLastContact').textContent =
+  formatDate(p.last_contact_at);
 
+document.getElementById('detailNextAction').textContent =
+  formatNextAction(p.next_action_at,p.status);
   document.getElementById('detailMessage').textContent='';
 }
+function formatDate(value){
+  if(!value) return '—';
 
+  const date=new Date(value);
+
+  if(Number.isNaN(date.getTime())) return '—';
+
+  return date.toLocaleString('fr-FR',{
+    dateStyle:'medium',
+    timeStyle:'short'
+  });
+}
+
+function formatNextAction(value,status){
+  if(!value) return '—';
+
+  const date=new Date(value);
+
+  if(Number.isNaN(date.getTime())) return '—';
+
+  if(date <= new Date() && status==='contacted'){
+    return '⚠ À relancer';
+  }
+
+  return date.toLocaleString('fr-FR',{
+    dateStyle:'medium',
+    timeStyle:'short'
+  });
+}
 function setLink(id,url){
 
   const el=document.getElementById(id);
