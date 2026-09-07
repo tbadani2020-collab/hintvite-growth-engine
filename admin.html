@@ -226,6 +226,7 @@ th{background:#fafafa}
 </div>
 <div class="actions">
 <button class="primary" onclick="generateMessage()">✦ Générer le message IA</button>
+<button onclick="generateFollowUp()">Générer la relance</button>
 <button onclick="markContacted()">Marquer comme contacté</button>
 <button onclick="requalify()">Recalculer le score IA</button>
 </div>
@@ -616,8 +617,41 @@ async function generateMessage(){
   textarea.value=data.message;
   status.textContent='Message généré avec succès.';
 }
+async function generateFollowUp(){
+  if(!currentProspect) return;
 
-async function sendEmail(){
+  const box=document.getElementById('aiMessageBox');
+  const textarea=document.getElementById('aiMessage');
+  const status=document.getElementById('aiMessageStatus');
+
+  box.classList.remove('hidden');
+  textarea.value='';
+  status.textContent='Génération de la relance IA en cours...';
+
+  const {data,error}=await sb.functions.invoke(
+    'generate-message',
+    {
+      body:{
+        prospect_id:currentProspect.id,
+        mode:'follow_up'
+      }
+    }
+  );
+
+  if(error){
+    status.textContent='Erreur : '+error.message;
+    return;
+  }
+
+  if(!data || !data.message){
+    status.textContent='Aucune relance générée.';
+    return;
+  }
+
+  textarea.value=data.message;
+  status.textContent='Relance générée avec succès.';
+}
+  async function sendEmail(){
 
   if(!currentProspect) return;
 
