@@ -350,12 +350,12 @@ function render(){
     return (!search || text.includes(search))
       && (!status || p.status===status)
      && ((p.score||0)>=minScore)
-     && (!followUp ||
-    (followUp==='due' &&
-     p.next_action_at &&
-     new Date(p.next_action_at)<=new Date()));
-  });
-
+   && (!followUp ||
+(followUp === 'due' &&
+p.status === 'contacted' &&
+p.next_action_at &&
+new Date(p.next_action_at).getTime() <= Date.now()));
+});
   const tbody=document.getElementById('prospects');
 
   tbody.innerHTML=filtered.map(p=>{
