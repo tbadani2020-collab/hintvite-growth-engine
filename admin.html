@@ -581,8 +581,9 @@ async function requalify(){
 
   document.getElementById('detailMessage').textContent=
     'Score IA recalculé.';
-}
+}let messageMode = 'initial';
 async function generateMessage(){
+  messageMode = 'initial';
 
   if(!currentProspect) return;
 
@@ -618,6 +619,7 @@ async function generateMessage(){
   status.textContent='Message généré avec succès.';
 }
 async function generateFollowUp(){
+  messageMode = 'follow_up';
   if(!currentProspect) return;
 
   const box=document.getElementById('aiMessageBox');
@@ -681,7 +683,16 @@ if(currentProspect.last_contact_at){
       }
     }
   );
-if(!error && currentProspect.last_contact_at){
+if(error){
+status.textContent = 'Erreur : ' + error.message;
+    return;
+  }
+
+  if(!data || !data.ok){
+    status.textContent = 'Erreur lors de l’envoi.';
+    return;
+  }
+if(messageMode === 'follow_up'){
   await sb
     .from('prospects')
     .update({
@@ -692,16 +703,6 @@ if(!error && currentProspect.last_contact_at){
   currentProspect.follow_up_count =
     (currentProspect.follow_up_count || 0) + 1;
 }
-  if(error){
-    status.textContent = 'Erreur : ' + error.message;
-    return;
-  }
-
-  if(!data || !data.ok){
-    status.textContent = 'Erreur lors de l’envoi.';
-    return;
-  }
-
   status.textContent = '✓ Email envoyé à ' + currentProspect.email;
 }
 async function copyAiMessage(){
