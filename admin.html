@@ -223,6 +223,7 @@ th{background:#fafafa}
   <h3>Suivi commercial</h3>
   <p><strong>Dernier contact :</strong> <span id="detailLastContact">—</span></p>
   <p><strong>Prochaine action :</strong> <span id="detailNextAction">—</span></p>
+  <p><strong>Relances envoyées :</strong> <span id="detailFollowUpCount">0</span></p>
 </div>
 <div class="actions">
 <button class="primary" onclick="generateMessage()">✦ Générer le message IA</button>
@@ -448,6 +449,8 @@ document.getElementById('detailLastContact').textContent =
 
 document.getElementById('detailNextAction').textContent =
   formatNextAction(p.next_action_at,p.status);
+  document.getElementById('detailFollowUpCount').textContent =
+  p.follow_up_count || 0;
   document.getElementById('detailMessage').textContent='';
 }
 function formatDate(value){
